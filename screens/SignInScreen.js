@@ -36,7 +36,7 @@ const SignInScreen = ({ navigation }) => {
     const { signIn } = React.useContext(AuthContext);
 
     const textInputChange = (val) => {
-        if (val.trim().length >= 4) {
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val)) {
             setData({
                 ...data,
                 username: val,
@@ -91,6 +91,12 @@ const SignInScreen = ({ navigation }) => {
     }
 
     const loginHandle = (userName, password) => {
+        if (data.username.length == 0 || data.password.length == 0) {
+            Alert.alert('Wrong Input!', 'Email or password field cannot be empty.', [
+                { text: 'Okay' }
+            ]);
+            return;
+        }
 
         fetch('https://payrollv2.herokuapp.com/auth/local', {
             method: 'POST',
@@ -103,62 +109,61 @@ const SignInScreen = ({ navigation }) => {
                 password: data.password
             })
         }).then((response) => response.json())
-        .then((data) => {
-            //console.log(data)
-            if(data==true){
-                const founduser=[{username:data.username,userToken:"pass"}]
-                console.log("Verified")
-                signIn(founduser);
-                return true
-            }
-            if(data[0]=="ue"){
-                
-                Alert.alert('User Not Exists','User not exists ! Please signup with us .', [
-                    { text: 'Okay' }
-                ]);
-                return
-            }
-            if(data[0]=="wp"){
-                
-                Alert.alert('Wrong Password','You have entered wrong password', [
-                    { text: 'Okay' }
-                ]);
-                return
-            }
-            if(data[0]=="ve"){
-                
-                Alert.alert('Validation Error','Please activate your account by tapping on the link mailed to you.', [
-                    { text: 'Okay' }
-                ]);
-                return
-            }
-            if(data[0]=="ag"){
-                
-                Alert.alert('Already a User','You have previously logged in using Google.', [
-                    { text: 'Okay' }
-                ]);
-                return
-            }
-            if(data[0]=="af"){
-                
-                Alert.alert('Already a User','You have previously logged in using Facebook.', [
-                    { text: 'Okay' }
-                ]);
-                return
-            }
-            
-        })
-        .catch((error) => {
-            console.error(error);
-            return false
-        });
+            .then((data) => {
+                //console.log(data)
+                if (data[0] == 'true') {
+                    id=data[1]
+                    const founduser = [{ username: data.username, userToken: id }]
+                    console.log("Verified")
+                    signIn(founduser);
+                    return true
+                }
+                if (data[0] == "ue") {
 
-        if (data.username.length == 0 || data.password.length == 0) {
-            Alert.alert('Wrong Input!', 'Username or password field cannot be empty.', [
-                { text: 'Okay' }
-            ]);
-            return;
-        }
+                    Alert.alert('User Not Exists', 'User not exists ! Please signup with us .', [
+                        { text: 'Okay' }
+                    ]);
+                    return
+                }
+                if (data[0] == "wp") {
+
+                    Alert.alert('Wrong Password', 'You have entered wrong password', [
+                        { text: 'Okay' }
+                    ]);
+                    return
+                }
+                if (data[0] == "ve") {
+
+                    Alert.alert('Validation Error', 'Please activate your account by tapping on the link mailed to you.', [
+                        { text: 'Okay' }
+                    ]);
+                    return
+                }
+                if (data[0] == "ag") {
+
+                    Alert.alert('Already a User', 'You have previously logged in using Google.', [
+                        { text: 'Okay' }
+                    ]);
+                    return
+                }
+                if (data[0] == "af") {
+
+                    Alert.alert('Already a User', 'You have previously logged in using Facebook.', [
+                        { text: 'Okay' }
+                    ]);
+                    return
+                }
+
+            })
+            .catch((error) => {
+                console.error(error);
+                Alert.alert('Database Error', 'Please try again Later.', [
+                    { text: 'Okay' }
+                ]);
+                return false
+            });
+
+
 
         //signIn(foundUser);
     }
@@ -177,15 +182,15 @@ const SignInScreen = ({ navigation }) => {
             >
                 <Text style={[styles.text_footer, {
                     color: colors.text
-                }]}>Username</Text>
+                }]}>Email</Text>
                 <View style={styles.action}>
                     <FontAwesome
-                        name="user-o"
+                        name="envelope"
                         color={colors.text}
                         size={20}
                     />
                     <TextInput
-                        placeholder="Your Username"
+                        placeholder="Your Email"
                         placeholderTextColor="#666666"
                         style={[styles.textInput, {
                             color: colors.text
@@ -208,7 +213,7 @@ const SignInScreen = ({ navigation }) => {
                 </View>
                 {data.isValidUser ? null :
                     <Animatable.View animation="fadeInLeft" duration={500}>
-                        <Text style={styles.errorMsg}>Username must be 4 characters long.</Text>
+                        <Text style={styles.errorMsg}>Enter a  Valid Email.</Text>
                     </Animatable.View>
                 }
 
@@ -258,7 +263,7 @@ const SignInScreen = ({ navigation }) => {
                 }
 
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>navigation.navigate('ForgotPassScreen')}>
                     <Text style={{ color: '#ed3749', marginTop: 15 }}>Forgot password?</Text>
                 </TouchableOpacity>
                 <View style={styles.button}>
@@ -272,12 +277,38 @@ const SignInScreen = ({ navigation }) => {
                             start={[-1, 0]}
                             end={[1, 0]}
                         >
+                            
                             <Text style={[styles.textSign, {
                                 color: '#fff'
                             }]}>Sign In</Text>
                         </LinearGradient>
                     </TouchableOpacity>
 
+                    
+                    <TouchableOpacity
+                        style={[styles.signIn,{
+                            marginTop: 15
+                        }]}
+                        onPress={() => { loginHandle(data.username, data.password) }}
+                    >
+                        <LinearGradient
+                            colors={['#466afa', '#2041c7', '#6482fa', '#466afa']}
+                            style={styles.signIn}
+                            start={[-1, 0]}
+                            end={[1, 0]}
+                        >
+
+                            <Text style={[styles.textSign, {
+                                color: '#fff'
+                            }]}>
+                                <FontAwesome
+                                name="google-plus"
+                                color="#ffff"
+                                size={20}
+                                alignItems='flex-start'
+                            />    Google Login</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => navigation.navigate('SignUpScreen')}
                         style={[styles.signIn, {
@@ -359,7 +390,7 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 10
+        borderRadius: 10,
     },
     textSign: {
         fontSize: 18,

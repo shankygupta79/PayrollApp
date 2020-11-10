@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
+    "@react-native-community/google-signin": "^5.0.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/drawer": "^5.10.7",
     "@react-navigation/material-bottom-tabs": "^5.3.7",
