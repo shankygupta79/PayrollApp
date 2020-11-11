@@ -10,6 +10,7 @@ import {
     Alert
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import * as Linking from 'expo-linking';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -32,7 +33,7 @@ const SignInScreen = ({ navigation }) => {
     });
 
     const { colors } = useTheme();
-
+    let redirectUrl = Linking.makeUrl('path/into/app', { hello: 'world', goodbye: 'now' });
     const { signIn } = React.useContext(AuthContext);
 
     const textInputChange = (val) => {
@@ -112,8 +113,7 @@ const SignInScreen = ({ navigation }) => {
             .then((data) => {
                 //console.log(data)
                 if (data[0] == 'true') {
-                    id=data[1]
-                    const founduser = [{ username: data.username, userToken: id }]
+                    const founduser = [{ username: data.username, userToken: data[1],fullname:data[2],access:data[3],currency:data[4],office_close:data[5],logo:data[6],admin:data[7],userToken2:data[8]}]
                     console.log("Verified")
                     signIn(founduser);
                     return true

@@ -97,6 +97,7 @@ const App = () => {
     }
   };
 
+
   const [loginState, dispatch] = React.useReducer(loginReducer, initialLoginState);
 
   const authContext = React.useMemo(() => ({
@@ -108,6 +109,13 @@ const App = () => {
       
       try {
         await AsyncStorage.setItem('userToken', userToken);
+        await AsyncStorage.setItem('fullname', foundUser[0].fullname);
+        await AsyncStorage.setItem('access', foundUser[0].access);
+        await AsyncStorage.setItem('currency', foundUser[0].currency);
+        await AsyncStorage.setItem('office_close', foundUser[0].office_close);
+        await AsyncStorage.setItem('logo', foundUser[0].logo)
+        await AsyncStorage.setItem('admin', foundUser[0].admin);
+        await AsyncStorage.setItem('userToken2', foundUser[0].userToken2);
       } catch(e) {
         console.log(e);
       }
