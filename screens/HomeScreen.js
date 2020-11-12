@@ -1,123 +1,178 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  StatusBar,
+  ScrollView,
+  RefreshControl
+} from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import * as Animatable from 'react-native-animatable';
-import { ScrollView } from 'react-native-gesture-handler';
-const HomeScreen = ({ navigation }) => {
 
+const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const [data, setData] = React.useState({
-    total: '',
-    present: '',
-    absent: '',
-    dep: ''
+    total: '0',
+    present: '0',
+    absent: '0',
+    dep: '0',
   });
+  const[ref,setRef]=React.useState(false)
+  const onRefresh = () => {
+    setRef(true);
+    setTimeout(function(){ setRef(false) }, 1500);
+    
+  }
   React.useEffect(() => {
-    var id = ''
-    var adm = ''
+    var id = '';
+    var adm = '';
     AsyncStorage.getItem('userToken', (err, result) => {
-      id = result
+      id = result;
       AsyncStorage.getItem('admin', (err, result) => {
-        adm = result
-        fetch('https://payrollv2.herokuapp.com/dashboard/api/dash?id=' + id + '=&platform=APP&admin=' + adm, {
-          method: 'GET'
-        })
+        adm = result;
+        fetch(
+          'https://payrollv2.herokuapp.com/dashboard/api/dash?id=' +
+            id +
+            '=&platform=APP&admin=' +
+            adm,
+          {
+            method: 'GET',
+          }
+        )
           .then((response) => response.json())
           .then((responseJson) => {
-            console.log(responseJson);
-            data.present = responseJson[2]
-            data.absent = responseJson[3]
-            data.dep = responseJson[1]
-            data.total = responseJson[0]
-
+            setData({
+              present : responseJson[2],
+              absent : responseJson[3],
+              dep : responseJson[1],
+              total : responseJson[0]
+            })
           })
           .catch((error) => {
             console.error(error);
           });
       });
     });
-
-
-  }, [navigation])
+  }, [navigation]);
 
   const theme = useTheme();
 
   return (
+    <ScrollView refreshControl={
+          <RefreshControl
+            refreshing={ref}
+            onRefresh={onRefresh}
+          />}
+        >
     <View style={styles.container}>
-      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
       <View style={styles.row}>
-        <View style={{ flex: 2, flexDirection: "row", justifyContent: 'space-between' }}>
-          <View style={[{ borderColor: 'brown'},styles.circle]}>
-          <Text style={[styles.xx,{fontSize:48}]}>{data.total}</Text>
-          <Text style={styles.xx}>Total</Text>
+        <View
+          style={{
+            flex: 2,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <View>
+            <AnimatedCircularProgress
+              size={180}
+              width={10}
+              fill={90}
+              padding={20}
+              tintColor="#00e0ff"
+              backgroundColor="#3d5875">
+              {(fill) => <View>
+                <Text style={[styles.xx, { fontSize: 24,color:colors.text  }]}>{data.total}</Text>
+                <Text style={[styles.xx, { color:colors.text  }]}>Employees </Text>
+              </View>}
+            </AnimatedCircularProgress>
           </View>
-          <View style={[{ borderColor: 'yellow'},styles.circle]}>
-          <Text style={[styles.xx,{fontSize:48}]}>{data.dep}</Text>
-          <Text style={styles.xx}>Department </Text>
+          <View>
+            <AnimatedCircularProgress
+              size={180}
+              width={10}
+              fill={99.9}
+              padding={20}
+              tintColor="#fcb612"
+              backgroundColor="#fced12">
+              {(fill) => <View>
+                <Text style={[styles.xx, { fontSize: 24,color:colors.text }]}>{data.dep}</Text>
+                <Text style={[styles.xx, { color:colors.text  }]}>Departments </Text>
+              </View>}
+            </AnimatedCircularProgress>
           </View>
         </View>
-        <View style={{ flex: 2, flexDirection: "row", justifyContent: 'space-between' }}>
-          <View style={[{ borderColor: 'green'},styles.circle]}>
-          <Animatable.Text animation="pulse" easing="ease-out" iterationCount="infinite" style={[styles.xx,{fontSize:48}]}>{data.present}</Animatable.Text>
-          
-            <Text style={styles.xx}>Present</Text>
-          </View>
-          
-          <View style={[{ borderColor: 'red'},styles.circle]}>
-            
-            <Animatable.Text animation="pulse" easing="ease-out" iterationCount="infinite" style={[styles.xx,{fontSize:48}]}>{data.absent}</Animatable.Text>
-          <Text style={styles.xx}>Absent </Text>
-          </View>
-
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <AnimatedCircularProgress
+            size={180}
+            width={10}
+            fill={90}
+            padding={20}
+            tintColor="#12b007"
+            backgroundColor="#064a01">
+            {(fill) => <View>
+                <Text style={[styles.xx, { fontSize: 24,color:colors.text }]}>{data.present}</Text>
+                <Text style={[styles.xx, { color:colors.text  }]}>Present </Text>
+              </View>}
+          </AnimatedCircularProgress>
+          <AnimatedCircularProgress
+            size={180}
+            width={10}
+            fill={90}
+            padding={20}
+            tintColor="#fa1414"
+            backgroundColor="#730101">
+            {(fill) => (
+              <View>
+                <Text style={[styles.xx, { fontSize: 24 ,color:colors.text }]}>{data.absent}</Text>
+                <Text style={[styles.xx, { color:colors.text  }]}>Absents </Text>
+              </View>
+            )}
+          </AnimatedCircularProgress>
         </View>
 
-        <View style={{ flex: 2, flexDirection: "row", justifyContent: 'space-between' }}>
-          
-
-        </View>
-
-
+        <View
+          style={{
+            flex: 2,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}></View>
       </View>
       <Animatable.View
         animation="fadeInUpBig"
-        style={[styles.footer, {
-          backgroundColor: colors.background
-        }]}
-      >
-
-      </Animatable.View>
-
+        style={[
+          styles.footer,
+          {
+            backgroundColor: colors.background,
+          },
+        ]}></Animatable.View>
     </View>
+    </ScrollView>
   );
 };
-class HomScreen extends React.Component {
-
-}
+class HomScreen extends React.Component {}
 export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: "3%",
+    margin: '3%',
   },
   row: {
     flexDirection: 'column',
-    flex: 1
+    flex: 1,
   },
-  circle: {
-    width: "40%",
-    borderRadius: 100,
-    borderWidth: 5,
-    margin: '5%',
-    justifyContent:'center',
+  xx: {
     fontWeight: 'bold',
-    alignItems:'center',
-
-
-  },xx:{
-    fontWeight: 'bold',
-    fontSize:20,
-    justifyContent:'center',
-  }
+    fontSize: 12,
+    justifyContent: 'center',
+  },
 });

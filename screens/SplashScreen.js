@@ -17,17 +17,21 @@ const SplashScreen = ({navigation}) => {
     const { colors } = useTheme();
 
     return (
-      <View style={styles.container}>
-          <StatusBar backgroundColor='#009387' barStyle="light-content"/>
-        <View style={styles.header}>
+      <View style={[styles.container, {
+        backgroundColor: colors.background
+    }]}>
+          <StatusBar backgroundColor='#ed3749' barStyle="light-content"/>
+        <View style={[styles.header, {
+                backgroundColor: colors.background
+            }]}>
             <Text style={[styles.title, {
-                color: "#171616"
+                color: colors.text
             }]}>PAYROLL</Text>
             <Animatable.Image 
                 animation="bounceIn"
                 duraton="1500"
             source={require('../assets/logo.png')}
-            style={styles.logo}
+            style={[styles.logo]}
             resizeMode="stretch"
             />
         </View>
@@ -81,7 +85,7 @@ const styles = StyleSheet.create({
   },
   footer: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: 'purple',
       borderTopLeftRadius: 30,
       borderTopRightRadius: 30,
       paddingVertical: 50,

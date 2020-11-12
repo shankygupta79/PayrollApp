@@ -16,7 +16,7 @@ import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-
+import { useTheme } from 'react-native-paper';
 const SignInScreen = ({ navigation }) => {
 
     const [data, setData] = React.useState({
@@ -31,7 +31,7 @@ const SignInScreen = ({ navigation }) => {
         secureTextEntry: true,
         confirm_secureTextEntry: true,
     });
-
+    const { colors } = useTheme();
     const textInputChange = (val) => {
         if (val.length !== 0) {
             setData({
@@ -198,13 +198,15 @@ const SignInScreen = ({ navigation }) => {
 
         return (
             <View style={styles.container}>
-                <StatusBar backgroundColor='#009387' barStyle="light-content" />
+                <StatusBar backgroundColor='#ed3749' barStyle="light-content" />
                 <View style={styles.header}>
                     <Text style={styles.text_header}>Register Now!</Text>
                 </View>
                 <Animatable.View
                     animation="fadeInUpBig"
-                    style={styles.footer}
+                    style={[styles.footer, {
+                        backgroundColor: colors.background
+                    }]}
                 >
                     <ScrollView>
                         <Text style={styles.text_footer}>Full Name</Text>

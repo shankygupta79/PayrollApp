@@ -13,10 +13,7 @@ import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-
 import { useTheme } from 'react-native-paper';
-
-import { AuthContext } from '../components/context';
 
 
 const ForgotPassScreen = ({ navigation }) => {
@@ -31,8 +28,6 @@ const ForgotPassScreen = ({ navigation }) => {
     });
 
     const { colors } = useTheme();
-
-    const { signIn } = React.useContext(AuthContext);
 
     const textInputChange = (val) => {
         if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val)) {
@@ -99,7 +94,7 @@ const ForgotPassScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <StatusBar backgroundColor='#009387' barStyle="light-content" />
+            <StatusBar backgroundColor='#ed3749' barStyle="light-content" />
             <View style={styles.header}>
                 <Text style={styles.text_header}>Forgot Password ?</Text>
             </View>
