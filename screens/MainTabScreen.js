@@ -6,12 +6,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import HomeScreen from './HomeScreen';
-import DetailsScreen from './DetailsScreen';
+import AttendanceScreen from './AttendanceStackScreen';
 import ExploreScreen from './ExploreScreen';
-import ProfileScreen from './ProfileScreen';
+import EmployeeScreen from './EmployeeStackScreen';
 
 const HomeStack = createStackNavigator();
-const DetailsStack = createStackNavigator();
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -37,7 +36,7 @@ const MainTabScreen = () => (
     />
     <Tab.Screen
       name="Daily Attendance"
-      component={DetailsStackScreen}
+      component={AttendanceScreen}
       options={{
         tabBarLabel: 'Attendance',
         tabBarColor: '#47c72a',
@@ -52,7 +51,7 @@ const MainTabScreen = () => (
     />
     <Tab.Screen
       name="Employees"
-      component={ProfileScreen}
+      component={EmployeeScreen}
       options={{
         tabBarLabel: 'Employees',
         tabBarColor: 'green',
@@ -100,20 +99,4 @@ const HomeStackScreen = ({ navigation }) => (
   </HomeStack.Navigator>
 );
 
-const DetailsStackScreen = ({ navigation }) => (
-  <DetailsStack.Navigator screenOptions={{
-    headerStyle: {
-      backgroundColor: '#47c72a',
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-      fontWeight: 'bold'
-    }
-  }}>
-    <DetailsStack.Screen name="Daily Attendance" component={DetailsScreen} options={{
-      headerLeft: () => (
-        <Icon.Button name="ios-menu" size={25} backgroundColor="#47c72a" onPress={() => navigation.openDrawer()}></Icon.Button>
-      )
-    }} />
-  </DetailsStack.Navigator>
-);
+

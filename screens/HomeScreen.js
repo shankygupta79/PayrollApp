@@ -6,7 +6,8 @@ import {
   StyleSheet,
   StatusBar,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  ActivityIndicator
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -15,6 +16,7 @@ import * as Animatable from 'react-native-animatable';
 
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const [loader, setLoader] = React.useState(false)
   const [data, setData] = React.useState({
     total: '0',
     present: '0',
@@ -34,15 +36,10 @@ const HomeScreen = ({ navigation }) => {
       id = result;
       AsyncStorage.getItem('admin', (err, result) => {
         adm = result;
-        fetch(
-          'https://payrollv2.herokuapp.com/dashboard/api/dash?id=' +
-            id +
-            '=&platform=APP&admin=' +
-            adm,
-          {
-            method: 'GET',
-          }
-        )
+        setLoader(false)
+        api='https://payrollv2.herokuapp.com/dashboard/api/dash?id=' +encodeURIComponent(id) +'&platform=APP&admin=' +encodeURIComponent(adm);
+        console.log(api)
+        fetch(api)
           .then((response) => response.json())
           .then((responseJson) => {
             setData({
@@ -51,6 +48,7 @@ const HomeScreen = ({ navigation }) => {
               dep : responseJson[1],
               total : responseJson[0]
             })
+            setLoader(true)
           })
           .catch((error) => {
             console.error(error);
@@ -68,6 +66,7 @@ const HomeScreen = ({ navigation }) => {
             onRefresh={onRefresh}
           />}
         >
+          {loader?
     <View style={styles.container}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
       <View style={styles.row}>
@@ -154,7 +153,7 @@ const HomeScreen = ({ navigation }) => {
             backgroundColor: colors.background,
           },
         ]}></Animatable.View>
-    </View>
+    </View>:<ActivityIndicator style={styles.loader}size="large" color="purple"/>}
     </ScrollView>
   );
 };
@@ -174,5 +173,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
     justifyContent: 'center',
-  },
+  },loader:{
+    flex: 1,
+    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10,
+    marginTop:"50%",
+  }
 });

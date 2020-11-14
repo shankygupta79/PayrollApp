@@ -91,7 +91,7 @@ export function DrawerContent(props) {
                             )}
                             label="Attendance"
                             onPress={() => {
-                                props.navigation.navigate('BookmarkScreen');
+                                props.navigation.navigate('AttendanceStackScreen');
                             }}
                         />
                         
