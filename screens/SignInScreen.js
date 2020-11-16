@@ -7,7 +7,8 @@ import {
     Platform,
     StyleSheet,
     StatusBar,
-    Alert
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import * as Linking from 'expo-linking';
@@ -30,7 +31,7 @@ const SignInScreen = ({ navigation }) => {
         isValidUser: true,
         isValidPassword: true,
     });
-
+    const [button,setButton]=React.useState(true)
     const { colors } = useTheme();
     let redirectUrl = Linking.makeUrl('path/into/app', { hello: 'world', goodbye: 'now' });
     const { signIn } = React.useContext(AuthContext);
@@ -97,7 +98,7 @@ const SignInScreen = ({ navigation }) => {
             ]);
             return;
         }
-
+        setButton(false)
         fetch('https://payrollv2.herokuapp.com/auth/local', {
             method: 'POST',
             headers: {
@@ -122,6 +123,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('User Not Exists', 'User not exists ! Please signup with us .', [
                         { text: 'Okay' }
                     ]);
+                    setButton(true)
                     return
                 }
                 if (data[0] == "wp") {
@@ -129,6 +131,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Wrong Password', 'You have entered wrong password', [
                         { text: 'Okay' }
                     ]);
+                    setButton(true)
                     return
                 }
                 if (data[0] == "ve") {
@@ -136,6 +139,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Validation Error', 'Please activate your account by tapping on the link mailed to you.', [
                         { text: 'Okay' }
                     ]);
+                    setButton(true)
                     return
                 }
                 if (data[0] == "ag") {
@@ -143,6 +147,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Already a User', 'You have previously logged in using Google.', [
                         { text: 'Okay' }
                     ]);
+                    setButton(true)
                     return
                 }
                 if (data[0] == "af") {
@@ -150,6 +155,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Already a User', 'You have previously logged in using Facebook.', [
                         { text: 'Okay' }
                     ]);
+                    setButton(true)
                     return
                 }
 
@@ -159,6 +165,7 @@ const SignInScreen = ({ navigation }) => {
                 Alert.alert('Database Error', 'Please try again Later.', [
                     { text: 'Okay' }
                 ]);
+                setButton(true)
                 return false
             });
 
@@ -191,9 +198,12 @@ const SignInScreen = ({ navigation }) => {
                     <TextInput
                         placeholder="Your Email"
                         placeholderTextColor="#666666"
+                        editable={button}
+                        selectTextOnFocus={button}
                         style={[styles.textInput, {
                             color: colors.text
                         }]}
+                        
                         autoCapitalize="none"
                         onChangeText={(val) => textInputChange(val)}
                         onEndEditing={(e) => handleValidUser(e.nativeEvent.text)}
@@ -235,6 +245,8 @@ const SignInScreen = ({ navigation }) => {
                             color: colors.text
                         }]}
                         autoCapitalize="none"
+                        editable={button}
+                        selectTextOnFocus={button}
                         onChangeText={(val) => handlePasswordChange(val)}
                     />
                     <TouchableOpacity
@@ -279,7 +291,9 @@ const SignInScreen = ({ navigation }) => {
                             
                             <Text style={[styles.textSign, {
                                 color: '#fff'
-                            }]}>Sign In</Text>
+                            }]}>Sign In
+                            </Text>
+                            {!button?<ActivityIndicator style={{marginLeft:"5%"}} size="small" color="white"/>:null}
                         </LinearGradient>
                     </TouchableOpacity>
 
@@ -390,6 +404,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
+        flexDirection:'row'
     },
     textSign: {
         fontSize: 18,

@@ -78,7 +78,7 @@ export function DrawerContent(props) {
                             )}
                             label="Employees"
                             onPress={() => {
-                                props.navigation.navigate('ProfileScreen');
+                                props.navigation.navigate('EmployeeStackScreen');
                             }}
                         />
                         <DrawerItem

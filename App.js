@@ -22,6 +22,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import BookmarkScreen from './screens/BookmarkScreen';
 import AttendanceStackScreen from './screens/AttendanceStackScreen';
 import EmployeeStackScreen from './screens/EmployeeStackScreen';
+import EditEmpStackScreen from './screens/EditEmpStackScreen';
 
 import { AuthContext } from './components/context';
 
@@ -177,6 +178,7 @@ const App = () => {
           <Drawer.Screen name="BookmarkScreen" component={BookmarkScreen} />
           <Drawer.Screen name="EmployeeStackScreen" component={EmployeeStackScreen} />
           <Drawer.Screen name="AttendanceStackScreen" component={AttendanceStackScreen} />
+          <Drawer.Screen name="EditEmpStackScreen" component={EditEmpStackScreen} />
         </Drawer.Navigator>
       )
     :

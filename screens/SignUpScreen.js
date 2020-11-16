@@ -2,7 +2,6 @@ import React from 'react';
 import {
     View,
     Text,
-    Button,
     TouchableOpacity,
     Dimensions,
     TextInput,
@@ -10,7 +9,8 @@ import {
     StyleSheet,
     ScrollView,
     StatusBar,
-    Alert
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,7 +18,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import { useTheme } from 'react-native-paper';
 const SignInScreen = ({ navigation }) => {
-
+    const [button,setButton]=React.useState(true)
     const [data, setData] = React.useState({
         username: '',
         password: '',
@@ -99,34 +99,42 @@ const SignInScreen = ({ navigation }) => {
         });
     }
     const signup = (userName, password, name, mail) => {
+        setButton(false)
         if (data.check_name==false) {
             Alert.alert('Wrong Input!', 'Name field cannot be empty.', [
                 { text: 'Okay' }
             ]);
+            setButton(true)
             return;
+            
         }
         if (data.check_mail==false) {
             Alert.alert('Wrong Email!', 'Invalid E-Mail entered.', [
                 { text: 'Okay' }
             ]);
+            setButton(true)
             return;
         }
-        if (data.check_password==false) {
+        if (data.password<8) {
             Alert.alert('Wrong Input!', 'Password field cannot be empty and password should have more than 8 characters.', [
                 { text: 'Okay' }
             ]);
+            setButton(true)
             return;
         }
         if (data.check_textInputChange==false) {
             Alert.alert('Wrong Input!', 'Username field cannot be empty.', [
                 { text: 'Okay' }
             ]);
+            setButton(true)
             return;
         }
-        if(data.password!=data.confirm_password){
+        if(data.password!=data.confirm_password ){
             Alert.alert('Password Doesnt Match','Check your password again',[
                 { text: 'Okay' }
             ])
+            setButton(true)
+            return
         }
         fetch('https://payrollv2.herokuapp.com/signup', {
             method: 'POST',
@@ -148,6 +156,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Hurry! Account created','An activtion Mail Has Been Sent to your Mail and you will be redirected automatically to the login page', [
                         { text: 'Okay' ,onPress:()=> navigation.goBack()}
                     ]);
+                    setButton(true)
                     return
                 }
                 if(data.data=="ae"){
@@ -155,6 +164,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Email Already Registered','Email Already Registered, Login with your email Id', [
                         { text: 'Okay',onPress:()=> navigation.goBack() }
                     ]);
+                    setButton(true)
                     return
                 }
                 if(data.data=="ug"){
@@ -162,6 +172,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Email Registered with Google','Email already Registered with Google,Please sign in with Google', [
                         { text: 'Okay',onPress:()=> navigation.goBack()}
                     ]);
+                    setButton(true)
                     return
                 }
                 if(data.data=="uf"){
@@ -169,6 +180,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Email Registered with Facebook','Email already Registered with Google,Please sign in with Facebook', [
                         { text: 'Okay',onPress:()=> navigation.goBack() }
                     ]);
+                    setButton(true)
                     return
                 }
                 if(data.data=="error"){
@@ -176,6 +188,7 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Database Error','Please try again Later.', [
                         { text: 'Okay',onPress:()=> navigation.goBack()}
                     ]);
+                    setButton(true)
                     
                     return
                 }
@@ -184,6 +197,7 @@ const SignInScreen = ({ navigation }) => {
                 Alert.alert('Database Error','Please try again Later.', [
                     { text: 'Okay' }
                 ]);
+                setButton(true)
                 return false
             })
 
@@ -380,6 +394,7 @@ const SignInScreen = ({ navigation }) => {
                                     <Text style={[styles.textSign, {
                                         color: '#fff'
                                     }]}>Sign Up</Text>
+                                     {!button?<ActivityIndicator style={{marginLeft:"5%"}} size="small" color="white"/>:null}
                                 </LinearGradient>
                             </TouchableOpacity>
 
@@ -454,7 +469,8 @@ const SignInScreen = ({ navigation }) => {
             height: 50,
             justifyContent: 'center',
             alignItems: 'center',
-            borderRadius: 10
+            borderRadius: 10,
+            flexDirection:'row'
         },
         textSign: {
             fontSize: 18,

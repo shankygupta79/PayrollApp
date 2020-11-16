@@ -149,7 +149,7 @@ const AttendanceScreen = ({ navigation }) => {
                     <Avatar.Image size={74} source={{ uri: item.photo }} />
                   <Text style={[{ flexDirection: "column", fontSize: 18, width: "50%", color: colors.text }]} numberOfLines={2}>{item.name} </Text>
 
-                  <ToggleSwitch isOn={myArray[key].status} onToggle={isOn => mark(item.idx)} />
+                  <ToggleSwitch isOn={item.status} onToggle={isOn => mark(item.idx)} />
 
 
 
