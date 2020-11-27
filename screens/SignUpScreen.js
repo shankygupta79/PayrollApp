@@ -18,6 +18,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import { useTheme } from 'react-native-paper';
 const SignInScreen = ({ navigation }) => {
+    
     const [button,setButton]=React.useState(true)
     const [data, setData] = React.useState({
         username: '',
@@ -223,11 +224,11 @@ const SignInScreen = ({ navigation }) => {
                     }]}
                 >
                     <ScrollView>
-                        <Text style={styles.text_footer}>Full Name</Text>
+                        <Text style={[styles.text_footer,{color:colors.text}]}>Full Name</Text>
                         <View style={styles.action}>
                             <FontAwesome
                                 name="id-card-o"
-                                color="#05375a"
+                                color="red"
                                 size={20}
                             />
                             <TextInput
@@ -249,12 +250,12 @@ const SignInScreen = ({ navigation }) => {
                                 : null}
                         </View>
                         <Text style={[styles.text_footer, {
-                            marginTop: 15
+                            marginTop: 15,color:colors.text
                         }]}>Username</Text>
                         <View style={styles.action}>
                             <FontAwesome
                                 name="user-o"
-                                color="#05375a"
+                                color="red"
                                 size={20}
                             />
                             <TextInput
@@ -277,12 +278,12 @@ const SignInScreen = ({ navigation }) => {
                         </View>
                         
                         <Text style={[styles.text_footer, {
-                            marginTop: 15
+                            marginTop: 15,color:colors.text
                         }]}>Email</Text>
                         <View style={styles.action}>
                             <FontAwesome
                                 name="envelope"
-                                color="#05375a"
+                                color="red"
                                 size={20}
                             />
                             <TextInput
@@ -304,12 +305,12 @@ const SignInScreen = ({ navigation }) => {
                                 : null}
                         </View>
                         <Text style={[styles.text_footer, {
-                            marginTop: 15
+                            marginTop: 15,color:colors.text
                         }]}>Password</Text>
                         <View style={styles.action}>
                             <Feather
                                 name="lock"
-                                color="#05375a"
+                                color="red"
                                 size={20}
                             />
                             <TextInput
@@ -339,12 +340,12 @@ const SignInScreen = ({ navigation }) => {
                         </View>
 
                         <Text style={[styles.text_footer, {
-                            marginTop: 15
+                            marginTop: 15,color:colors.text
                         }]}>Confirm Password</Text>
                         <View style={styles.action}>
                             <Feather
                                 name="lock"
-                                color="#05375a"
+                                color="red"
                                 size={20}
                             />
                             <TextInput

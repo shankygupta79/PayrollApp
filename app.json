@@ -2,15 +2,16 @@
   "expo": {
     "name": "PayrollApp",
     "slug": "PayrollApp",
+    "scheme": "payroll",
     "version": "1.0.0",
-    "scheme": "myapp",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f54248"
     },
+    
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -25,7 +26,23 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.shankygupta79.PayrollApp"
+      "enableDangerousExperimentalLeanBuilds":true,
+      "package": "com.shankygupta79.PayrollApp",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "payroll"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
       
     },
     "web": {

@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Google from 'expo-google-app-auth';
 import {
     View,
     Text,
@@ -31,7 +32,7 @@ const SignInScreen = ({ navigation }) => {
         isValidUser: true,
         isValidPassword: true,
     });
-    const [button,setButton]=React.useState(true)
+    const [button, setButton] = React.useState(true)
     const { colors } = useTheme();
     let redirectUrl = Linking.makeUrl('path/into/app', { hello: 'world', goodbye: 'now' });
     const { signIn } = React.useContext(AuthContext);
@@ -91,6 +92,61 @@ const SignInScreen = ({ navigation }) => {
         }
     }
 
+    const loginGoogle = () => {
+
+        signInWithGoogleAsync()
+        async function signInWithGoogleAsync() {
+            try {
+                console.log("G-")
+                const result = await Google.logInAsync({
+                    androidClientId: "324297696097-7and849kka8idqrk8moq91ubbs8fliiu.apps.googleusercontent.com",
+                    iosClientId: "324297696097-v4s7k340rtkprsf3bg85p2pncimg4krb.apps.googleusercontent.com",
+                    scopes: ['profile', 'email'],
+                });
+                if (result.type === 'success') {
+                    console.log("SUC")
+                    setButton(false)
+                    return fetch('https://payrollv2.herokuapp.com/auth/googleapp', {
+                        method: 'POST',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user: result.user,
+                        })
+                    }).then((response) => response.json())
+                        .then((data) => {
+                            //console.log(data)
+                            if (data[0] == 'true') {
+                                const founduser = [{ username: data.username, userToken: data[1], fullname: data[2], access: data[3], currency: data[4], office_close: data[5], logo: data[6], admin: data[7], userToken2: data[8] }]
+                                console.log("Verified")
+                                signIn(founduser);
+                                return true
+                            }
+                            if (data[0] == "false") {
+
+                                Alert.alert('Error in Authentication', 'Try Again ! ', [
+                                    { text: 'Okay' }
+                                ]);
+                                setButton(true)
+                                return
+                            }
+                        })
+                } else {
+                    Alert.alert('Try Again', 'Error in authorizing your google account !', [
+                        { text: 'Okay' }
+                    ]);
+                    return { cancelled: true };
+                }
+            } catch (e) {
+                Alert.alert('Error Occured', 'Error Logging using Google', [
+                    { text: 'Okay' }
+                ]);
+                return { error: true };
+            }
+        }
+    }
     const loginHandle = (userName, password) => {
         if (data.username.length == 0 || data.password.length == 0) {
             Alert.alert('Wrong Input!', 'Email or password field cannot be empty.', [
@@ -113,7 +169,7 @@ const SignInScreen = ({ navigation }) => {
             .then((data) => {
                 //console.log(data)
                 if (data[0] == 'true') {
-                    const founduser = [{ username: data.username, userToken: data[1],fullname:data[2],access:data[3],currency:data[4],office_close:data[5],logo:data[6],admin:data[7],userToken2:data[8]}]
+                    const founduser = [{ username: data.username, userToken: data[1], fullname: data[2], access: data[3], currency: data[4], office_close: data[5], logo: data[6], admin: data[7], userToken2: data[8] }]
                     console.log("Verified")
                     signIn(founduser);
                     return true
@@ -203,7 +259,7 @@ const SignInScreen = ({ navigation }) => {
                         style={[styles.textInput, {
                             color: colors.text
                         }]}
-                        
+
                         autoCapitalize="none"
                         onChangeText={(val) => textInputChange(val)}
                         onEndEditing={(e) => handleValidUser(e.nativeEvent.text)}
@@ -274,7 +330,7 @@ const SignInScreen = ({ navigation }) => {
                 }
 
 
-                <TouchableOpacity onPress={()=>navigation.navigate('ForgotPassScreen')}>
+                <TouchableOpacity onPress={() => navigation.navigate('ForgotPassScreen')}>
                     <Text style={{ color: '#ed3749', marginTop: 15 }}>Forgot password?</Text>
                 </TouchableOpacity>
                 <View style={styles.button}>
@@ -288,21 +344,21 @@ const SignInScreen = ({ navigation }) => {
                             start={[-1, 0]}
                             end={[1, 0]}
                         >
-                            
+
                             <Text style={[styles.textSign, {
                                 color: '#fff'
                             }]}>Sign In
                             </Text>
-                            {!button?<ActivityIndicator style={{marginLeft:"5%"}} size="small" color="white"/>:null}
+                            {!button ? <ActivityIndicator style={{ marginLeft: "5%" }} size="small" color="white" /> : null}
                         </LinearGradient>
                     </TouchableOpacity>
 
-                    
+
                     <TouchableOpacity
-                        style={[styles.signIn,{
+                        style={[styles.signIn, {
                             marginTop: 15
                         }]}
-                        onPress={() => { loginHandle(data.username, data.password) }}
+                        onPress={() => { loginGoogle() }}
                     >
                         <LinearGradient
                             colors={['#466afa', '#2041c7', '#6482fa', '#466afa']}
@@ -315,11 +371,11 @@ const SignInScreen = ({ navigation }) => {
                                 color: '#fff'
                             }]}>
                                 <FontAwesome
-                                name="google-plus"
-                                color="#ffff"
-                                size={20}
-                                alignItems='flex-start'
-                            />    Google Login</Text>
+                                    name="google-plus"
+                                    color="#ffff"
+                                    size={20}
+                                    alignItems='flex-start'
+                                />    Google Login</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -404,7 +460,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
-        flexDirection:'row'
+        flexDirection: 'row'
     },
     textSign: {
         fontSize: 18,

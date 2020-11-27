@@ -1,41 +1,40 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Dimensions, RefreshControl,FlatList,TouchableHighlight } from 'react-native';
+import { View, Text,Image, ScrollView, StyleSheet, Dimensions, RefreshControl, FlatList, TouchableHighlight } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ContentLoader from "react-native-easy-content-loader";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Avatar, } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Overlay } from 'react-native-elements';
 import { useTheme } from '@react-navigation/native';
 var { width, height } = Dimensions.get('window');
 const Stack = createStackNavigator();
+var sortfield = 'status'
+var sortfield2 = 'Status'
+var myArray = []
+const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 const EmployeeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const [visible, setVisible] = React.useState(false);
-  const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
   const [loader, setLoader] = React.useState(false)
-  const [myArray, setMyArray] = React.useState([])
-  const [sortfield, setSortField] = React.useState('status')
-  const [sortfield2, setSortField2] = React.useState('Status')
   const toggleOverlay = () => {
     setVisible(!visible);
   };
   const sort = (key) => {
     console.log(key)
-    setSortField(key)
-    if(key=='doj'){
-      setSortField2("Date of Joining")
-      setMyArray(myArray.sort(comparedate))
-    }else if(key=="des"){
-      setSortField2("Designation")
-      setMyArray(myArray.sort(compare))
-    }else if(key=="name"){
-      setSortField2("Name")
-      setMyArray(myArray.sort(compare))
-    }else{
-      setSortField2("Status")
-      setMyArray(myArray.sort(compare))
+    sortfield = key
+    if (key == 'doj') {
+      sortfield2 = "Date of Joining"
+      myArray.sort(comparedate)
+    } else if (key == "des") {
+      sortfield2 = "Designation"
+      myArray.sort(compare)
+    } else if (key == "name") {
+      sortfield2 = "Name"
+      myArray.sort(compare)
+    } else {
+      sortfield2 = "Status"
+      myArray.sort(compare)
     }
 
     setVisible(false)
@@ -78,14 +77,13 @@ const EmployeeScreen = ({ navigation }) => {
       api = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       console.log(api)
 
-      setLoader(true)
       fetch(api)
         .then((response) => response.json())
         .then((responseJson) => {
 
-          setMyArray(responseJson);
+          myArray = responseJson
           //console.log(myArray)
-          
+
           //sort('status')
           setLoader(true)
         }
@@ -100,28 +98,45 @@ const EmployeeScreen = ({ navigation }) => {
   return (
 
     <View style={styles.container}>
+      <View style={styles.touchableOpacityStyle}>
+      <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={()=>navigation.navigate('AddEmpStackScreen')}>
+          <Image
+            source={{
+              uri:
+                'https://raw.githubusercontent.com/AboutReact/sampleresource/master/plus_icon.png',
+            }}
+            style={styles.floatingButtonStyle}
+          />
+          
+        </TouchableOpacity></View>
       {loader ? <ScrollView refreshControl={
         <RefreshControl
           refreshing={ref}
           onRefresh={onRefresh}
         />}>
+        
 
-        <View style={{ backgroundColor: "#f2f5f2", padding: 5, flex: 1, alignItems: 'center', borderBottomColor: "#dcdedc", borderBottomWidth: 1 }}>
-          <TouchableOpacity onPress={toggleOverlay}><Text style={{ borderColor: '#c8ccc9', borderWidth: 1, padding: 5, borderRadius: 10 }}>Sort By : {sortfield2}</Text></TouchableOpacity></View>
-        <ScrollView
-        >
-          {visible?<View style={styles.overlay}>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity onPress={() => sort('name')}><Text style={[styles.sortbut,{backgroundColor:'name' === sortfield? "#F7EABE" : "#ffff"},{borderColor:'name' === sortfield? "orange" : "black"}]}>Name</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => sort('status')}><Text style={[styles.sortbut,{backgroundColor:'status' === sortfield? "#F7EABE" : "#ffff"},{borderColor:'status' === sortfield? "orange" : "black"}]}>Status</Text></TouchableOpacity>
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity onPress={() => sort('doj')}><Text style={[styles.sortbut,{backgroundColor:'doj' === sortfield? "#F7EABE" : "#ffff"},{borderColor:'doj' === sortfield? "orange" : "black"}]}>Date of Joining</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => sort('des')}><Text style={[styles.sortbut,{backgroundColor:'des' === sortfield? "#F7EABE" : "#ffff"},{borderColor:'des' === sortfield? "orange" : "black"}]}>Designation</Text></TouchableOpacity>
-            </View>
-          </View>:null}
+        
+        <View style={{ backgroundColor: "#f2f5f2", padding: 5, flex: 1, alignItems: 'center',elevation:5, }}>
+          <TouchableOpacity onPress={toggleOverlay}><Text style={{ borderColor: '#c8ccc9', borderWidth: 1, padding: 5, borderRadius: 10,fontFamily: "sans-serif-medium",backgroundColor:'white' }}>Sort By : {sortfield2}</Text></TouchableOpacity></View>
+        
           
+          {visible ? <View style={styles.overlay}>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity onPress={() => sort('name')}><Text style={[styles.sortbut, { backgroundColor: 'name' === sortfield ? "#faf0cd" : "#ffff" }, { borderColor: 'name' === sortfield ? "orange" : "black" }]}>Name</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => sort('status')}><Text style={[styles.sortbut, { backgroundColor: 'status' === sortfield ? "#F7EABE" : "#ffff" }, { borderColor: 'status' === sortfield ? "orange" : "black" }]}>Status</Text></TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity onPress={() => sort('doj')}><Text style={[styles.sortbut, { backgroundColor: 'doj' === sortfield ? "#F7EABE" : "#ffff" }, { borderColor: 'doj' === sortfield ? "orange" : "black" }]}>Date of Joining</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => sort('des')}><Text style={[styles.sortbut, { backgroundColor: 'des' === sortfield ? "#F7EABE" : "#ffff" }, { borderColor: 'des' === sortfield ? "orange" : "black" }]}>Designation</Text></TouchableOpacity>
+            </View>
+          </View> : null}
+          <ScrollView style={[{marginTop:5}]}
 
+        >
+          
           {myArray.map((item, key) => {
             return <View style={{ borderBottomColor: "grey", borderBottomWidth: 1 }} key={item.name} >
               <TouchableOpacity style={[styles.list, {
@@ -159,9 +174,11 @@ const EmployeeScreen = ({ navigation }) => {
               </TouchableOpacity>
 
             </View>
+            
 
 
           }
+          
           )}</ScrollView>
 
       </ScrollView>
@@ -218,25 +235,47 @@ const styles = StyleSheet.create({
     margin: "0%",
     padding: "5%",
     backgroundColor: "#f2f5f2",
+    elevation:5,
   }, list: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginLeft: "3%",
     marginRight: "3%",
-    marginTop: "2%"
+    marginTop: "2%",
+    padding:1,
+    marginBottom:"1%",
   }, table: {
     flex: 2,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginLeft: "10%",
-    marginRight: "15%"
+    marginRight: "15%",zIndex:0,
   }, sortbut: {
     borderColor: 'black',
     borderRadius: 10,
     borderWidth: 1,
+    fontFamily: "sans-serif-medium",
     padding: 5,
     margin: "5%",
     alignItems: 'center',
-  }
+    backgroundColor:'white',
+    paddingLeft:"5%"
+  }, touchableOpacityStyle: {
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex:100,
+    elevation: 300,
+    right: 30,
+    bottom: 30,
+    position:'absolute'
+    
+  },floatingButtonStyle: {
+    resizeMode: 'contain',
+    width: 50,
+    height: 50,
+    //backgroundColor:'black'
+  },
 });

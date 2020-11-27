@@ -23,6 +23,7 @@ import BookmarkScreen from './screens/BookmarkScreen';
 import AttendanceStackScreen from './screens/AttendanceStackScreen';
 import EmployeeStackScreen from './screens/EmployeeStackScreen';
 import EditEmpStackScreen from './screens/EditEmpStackScreen';
+import AddEmpStackScreen from './screens/AddEmpStackScreen';
 
 import { AuthContext } from './components/context';
 
@@ -31,7 +32,9 @@ import RootStackScreen from './screens/RootStackScreen';
 import AsyncStorage from '@react-native-community/async-storage';
 
 const Drawer = createDrawerNavigator();
-
+const mylink={
+  prefixes:['https://payroll.com','payroll://'],
+}
 const App = () => {
   // const [isLoading, setIsLoading] = React.useState(true);
   // const [userToken, setUserToken] = React.useState(null); 
@@ -169,7 +172,7 @@ const App = () => {
   return (
     <PaperProvider theme={theme}>
     <AuthContext.Provider value={authContext}>
-    <NavigationContainer theme={theme}>
+    <NavigationContainer theme={theme} linking={mylink}>
       { loginState.userToken !== null ? (
         <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />}>
           <Drawer.Screen name="HomeDrawer" component={MainTabScreen} />
@@ -179,6 +182,7 @@ const App = () => {
           <Drawer.Screen name="EmployeeStackScreen" component={EmployeeStackScreen} />
           <Drawer.Screen name="AttendanceStackScreen" component={AttendanceStackScreen} />
           <Drawer.Screen name="EditEmpStackScreen" component={EditEmpStackScreen} />
+          <Drawer.Screen name="AddEmpStackScreen" component={AddEmpStackScreen} />
         </Drawer.Navigator>
       )
     :
