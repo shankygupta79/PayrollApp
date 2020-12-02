@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "698764563613",
+    "firebase_url": "https://payroll-app-a08f8.firebaseio.com",
+    "project_id": "payroll-app-a08f8",
+    "storage_bucket": "payroll-app-a08f8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698764563613:android:5e788912a4f172dd92f074",
+        "android_client_info": {
+          "package_name": "com.shankygupta79.PayrollApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "698764563613-4s75btgskrsgqtppd9i77i62v2vssrbf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDkoTaHL6fCv6Ruiqqm8TUKD7QLK6pJVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "698764563613-4s75btgskrsgqtppd9i77i62v2vssrbf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

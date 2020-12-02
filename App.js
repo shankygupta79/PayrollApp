@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+
 import { 
   NavigationContainer, 
   DefaultTheme as NavigationDefaultTheme,
@@ -24,11 +25,12 @@ import AttendanceStackScreen from './screens/AttendanceStackScreen';
 import EmployeeStackScreen from './screens/EmployeeStackScreen';
 import EditEmpStackScreen from './screens/EditEmpStackScreen';
 import AddEmpStackScreen from './screens/AddEmpStackScreen';
-
+import AddHolStackScreen from './screens/AddHolStackScreen';
+import AddUserStackScreen from './screens/AddUserStackScreen';
+import HolidayStackScreen from './screens/HolidayStackScreen';
+import UsersStackScreen from './screens/UsersStackScreen';
 import { AuthContext } from './components/context';
-
 import RootStackScreen from './screens/RootStackScreen';
-
 import AsyncStorage from '@react-native-community/async-storage';
 
 const Drawer = createDrawerNavigator();
@@ -38,7 +40,7 @@ const mylink={
 const App = () => {
   // const [isLoading, setIsLoading] = React.useState(true);
   // const [userToken, setUserToken] = React.useState(null); 
-
+  
   const [isDarkTheme, setIsDarkTheme] = React.useState(false);
 
   const initialLoginState = {
@@ -142,6 +144,7 @@ const App = () => {
       // setUserToken('fgkj');
       // setIsLoading(false);
     },
+    
     toggleTheme: () => {
       setIsDarkTheme( isDarkTheme => !isDarkTheme );
     }
@@ -183,6 +186,10 @@ const App = () => {
           <Drawer.Screen name="AttendanceStackScreen" component={AttendanceStackScreen} />
           <Drawer.Screen name="EditEmpStackScreen" component={EditEmpStackScreen} />
           <Drawer.Screen name="AddEmpStackScreen" component={AddEmpStackScreen} />
+          <Drawer.Screen name="AddHolidayStackScreen" component={AddHolStackScreen} />
+          <Drawer.Screen name="AddUserStackScreen" component={AddUserStackScreen} />
+          <Drawer.Screen name="HolidayStackScreen" component={HolidayStackScreen} />
+          <Drawer.Screen name="UsersStackScreen" component={UsersStackScreen} />
         </Drawer.Navigator>
       )
     :

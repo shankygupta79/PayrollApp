@@ -132,7 +132,7 @@ export function DrawerContent(props) {
                             )}
                             label="Holidays"
                             onPress={() => {
-                                props.navigation.navigate('SupportScreen');
+                                props.navigation.navigate('HolidayStackScreen');
                             }}
                         />
                         <DrawerItem
@@ -158,7 +158,7 @@ export function DrawerContent(props) {
                             )}
                             label="Users"
                             onPress={() => {
-                                props.navigation.navigate('SupportScreen');
+                                props.navigation.navigate('UsersStackScreen');
                             }}
                         />
                     </Drawer.Section>

@@ -11,7 +11,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#f54248"
     },
-    
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -19,15 +18,29 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shankygupta79.payrollapp",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.324297696097-v4s7k340rtkprsf3bg85p2pncimg4krb"
+        }
+      }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "enableDangerousExperimentalLeanBuilds":true,
-      "package": "com.shankygupta79.PayrollApp",
+      "config": {
+        "googleSignIn": {
+          "apiKey": "AIzaSyDemvjt8sQMyJ-0EEIuhTu4WLUAfW2lloY",
+          "certificateHash": "4F9DCE38BADBBBA3831F6BFD294CA106A8B63DE8AC6514BF1FB8732F223EA794"
+        }
+      },
+      "enableDangerousExperimentalLeanBuilds": true,
+      "package": "com.shankygupta79.payrollapp",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -43,7 +56,10 @@
           ]
         }
       ]
-      
+    },
+    "notification": {
+      "color": "#ff0000",
+      "iosDisplayInForeground": true
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -12,18 +12,72 @@ import {
     ActivityIndicator
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import * as Linking from 'expo-linking';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
+import * as AppAuth from 'expo-app-auth'; // you will use this in your logInAsync method
+import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
-
 import { useTheme } from 'react-native-paper';
-
 import { AuthContext } from '../components/context';
 
+async function registerForPushNotificationsAsync() {
+    let token;
+    if (Constants.isDevice) {
+        const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Your Notifications for our App is Closed !');
+            return;
+        }
+        console.log("AYA")
+        expotoken = (await Notifications.getExpoPushTokenAsync()).data;
+        token = expotoken
 
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
+
+    return token;
+}
+var expotoken = ''
 const SignInScreen = ({ navigation }) => {
+    const [expoPushToken, setExpoPushToken] = React.useState('');
+    const [notification, setNotification] = React.useState(false);
+    const notificationListener = React.useRef();
+    const responseListener = React.useRef();
 
+    React.useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            setNotification(notification);
+        });
+
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log(response);
+        });
+
+        return () => {
+            Notifications.removeNotificationSubscription(notificationListener);
+            Notifications.removeNotificationSubscription(responseListener);
+        };
+
+    }, []);
     const [data, setData] = React.useState({
         username: '',
         password: '',
@@ -33,8 +87,9 @@ const SignInScreen = ({ navigation }) => {
         isValidPassword: true,
     });
     const [button, setButton] = React.useState(true)
+    const [button2, setButton2] = React.useState(true)
     const { colors } = useTheme();
-    let redirectUrl = Linking.makeUrl('path/into/app', { hello: 'world', goodbye: 'now' });
+    //let redirectUrl = Linking.makeUrl('path/into/app', { hello: 'world', goodbye: 'now' });
     const { signIn } = React.useContext(AuthContext);
 
     const textInputChange = (val) => {
@@ -93,19 +148,22 @@ const SignInScreen = ({ navigation }) => {
     }
 
     const loginGoogle = () => {
-
+        setButton2(false)
         signInWithGoogleAsync()
         async function signInWithGoogleAsync() {
             try {
                 console.log("G-")
                 const result = await Google.logInAsync({
-                    androidClientId: "324297696097-7and849kka8idqrk8moq91ubbs8fliiu.apps.googleusercontent.com",
                     iosClientId: "324297696097-v4s7k340rtkprsf3bg85p2pncimg4krb.apps.googleusercontent.com",
+                    androidClientId: "324297696097-7and849kka8idqrk8moq91ubbs8fliiu.apps.googleusercontent.com",
+                    androidStandaloneAppClientId: "324297696097-7and849kka8idqrk8moq91ubbs8fliiu.apps.googleusercontent.com",
+                    iosStandaloneAppClientId: "324297696097-v4s7k340rtkprsf3bg85p2pncimg4krb.apps.googleusercontent.com",
                     scopes: ['profile', 'email'],
+                    redirectUrl: "com.shankygupta79.payrollapp:/oauth2redirect/google" 
                 });
                 if (result.type === 'success') {
                     console.log("SUC")
-                    setButton(false)
+
                     return fetch('https://payrollv2.herokuapp.com/auth/googleapp', {
                         method: 'POST',
                         headers: {
@@ -114,6 +172,7 @@ const SignInScreen = ({ navigation }) => {
                         },
                         body: JSON.stringify({
                             user: result.user,
+                            expotoken: expotoken,
                         })
                     }).then((response) => response.json())
                         .then((data) => {
@@ -129,7 +188,7 @@ const SignInScreen = ({ navigation }) => {
                                 Alert.alert('Error in Authentication', 'Try Again ! ', [
                                     { text: 'Okay' }
                                 ]);
-                                setButton(true)
+                                setButton2(true)
                                 return
                             }
                         })
@@ -137,12 +196,14 @@ const SignInScreen = ({ navigation }) => {
                     Alert.alert('Try Again', 'Error in authorizing your google account !', [
                         { text: 'Okay' }
                     ]);
+                    setButton2(true)
                     return { cancelled: true };
                 }
             } catch (e) {
-                Alert.alert('Error Occured', 'Error Logging using Google', [
+                Alert.alert('Error Occured', 'Error Logging using Google' + e, [
                     { text: 'Okay' }
                 ]);
+                setButton2(true)
                 return { error: true };
             }
         }
@@ -162,8 +223,8 @@ const SignInScreen = ({ navigation }) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username: data.username,
-                password: data.password
+                username: data.username + ";" + expotoken,
+                password: data.password,
             })
         }).then((response) => response.json())
             .then((data) => {
@@ -376,6 +437,7 @@ const SignInScreen = ({ navigation }) => {
                                     size={20}
                                     alignItems='flex-start'
                                 />    Google Login</Text>
+                            {!button2 ? <ActivityIndicator style={{ marginLeft: "5%" }} size="small" color="white" /> : null}
                         </LinearGradient>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -459,7 +521,7 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 10,
+        borderRadius: Platform.OS === 'ios' ? 20 : 50,
         flexDirection: 'row'
     },
     textSign: {

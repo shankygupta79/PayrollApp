@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text,Image, ScrollView, StyleSheet, Dimensions, RefreshControl, FlatList, TouchableHighlight } from 'react-native';
+import { View, Text,Image, ScrollView, StyleSheet, Dimensions, RefreshControl,} from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ContentLoader from "react-native-easy-content-loader";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -99,18 +99,13 @@ const EmployeeScreen = ({ navigation }) => {
 
     <View style={styles.container}>
       <View style={styles.touchableOpacityStyle}>
-      <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={()=>navigation.navigate('AddEmpStackScreen')}>
-          <Image
-            source={{
-              uri:
-                'https://raw.githubusercontent.com/AboutReact/sampleresource/master/plus_icon.png',
-            }}
-            style={styles.floatingButtonStyle}
-          />
-          
-        </TouchableOpacity></View>
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => navigation.navigate('AddHolStackScreen')}>
+                    <FontAwesome name="plus" size={25} backgroundColor="orange" color="white" />
+
+                </TouchableOpacity>
+            </View>
       {loader ? <ScrollView refreshControl={
         <RefreshControl
           refreshing={ref}
@@ -262,20 +257,27 @@ const styles = StyleSheet.create({
     backgroundColor:'white',
     paddingLeft:"5%"
   }, touchableOpacityStyle: {
-    width: 50,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex:100,
-    elevation: 300,
-    right: 30,
-    bottom: 30,
-    position:'absolute'
-    
-  },floatingButtonStyle: {
     resizeMode: 'contain',
-    width: 50,
-    height: 50,
-    //backgroundColor:'black'
+        width: 50,
+        height: 50,
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        shadowOpacity: 0.29,
+        shadowRadius: 4.65,
+        zIndex: 100,
+
+        elevation: 7,
+        backgroundColor: 'green',
+
+        right: 30,
+        bottom: 30,
+        position: 'absolute'
+    
   },
 });
