@@ -12,6 +12,7 @@ import { RNS3 } from 'react-native-aws3';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import DropDownPicker from 'react-native-dropdown-picker';
+import Constants from 'expo-constants';
 const Stack = createStackNavigator();
 const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 var admin = '';
@@ -134,13 +135,13 @@ const AddEmpScreen = ({ navigation }) => {
 
             const options2 = {
                 keyPrefix: "uploads/",
-                bucket: "payrollbucket2",
-                region: "us-east-1",
+                bucket: Constants.manifest.extra.bucket,
+                region: Constants.manifest.extra.region,
                 acl: 'public-read',
-                accessKey: "07076BZYIHYRUCREHERE",
-                secretKey: "zVg4Ycdht6TGUqVTPOoIWF5wqASQ6MZ6KeO04Bsd",
+                accessKey: Constants.manifest.extra.accessKey,
+                secretKey: Constants.manifest.extra.secretKey,
                 successActionStatus: 201,
-                awsUrl: "cellar-c2.services.clever-cloud.com/"
+                awsUrl:Constants.manifest.extra.awsUrl
 
             };
             const options = {

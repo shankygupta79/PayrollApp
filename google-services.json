@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:698764563613:android:5e788912a4f172dd92f074",
+        "mobilesdk_app_id": "1:698764563613:android:5e8459604f2e899992f074",
         "android_client_info": {
-          "package_name": "com.shankygupta79.PayrollApp"
+          "package_name": "com.shankygupta79.payrollapp"
         }
       },
       "oauth_client": [

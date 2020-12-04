@@ -11,11 +11,10 @@ import {
     Alert,
     ActivityIndicator
 } from 'react-native';
+import Constants from 'expo-constants';
 import * as Animatable from 'react-native-animatable';
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
-import * as AppAuth from 'expo-app-auth'; // you will use this in your logInAsync method
-import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -154,17 +153,17 @@ const SignInScreen = ({ navigation }) => {
             try {
                 console.log("G-")
                 const result = await Google.logInAsync({
-                    iosClientId: "324297696097-v4s7k340rtkprsf3bg85p2pncimg4krb.apps.googleusercontent.com",
-                    androidClientId: "324297696097-7and849kka8idqrk8moq91ubbs8fliiu.apps.googleusercontent.com",
-                    androidStandaloneAppClientId: "324297696097-7and849kka8idqrk8moq91ubbs8fliiu.apps.googleusercontent.com",
-                    iosStandaloneAppClientId: "324297696097-v4s7k340rtkprsf3bg85p2pncimg4krb.apps.googleusercontent.com",
+                    iosClientId: Constants.manifest.extra.iosClientId,
+                    androidClientId: Constants.manifest.extra.androidClientId,
+                    androidStandaloneAppClientId: Constants.manifest.extra.androidClientId,
+                    iosStandaloneAppClientId: Constants.manifest.extra.iosClientId,
                     scopes: ['profile', 'email'],
                     redirectUrl: "com.shankygupta79.payrollapp:/oauth2redirect/google" 
                 });
                 if (result.type === 'success') {
                     console.log("SUC")
 
-                    return fetch('https://payrollv2.herokuapp.com/auth/googleapp', {
+                    return fetch(Constants.manifest.extra.google_api, {
                         method: 'POST',
                         headers: {
                             Accept: 'application/json',

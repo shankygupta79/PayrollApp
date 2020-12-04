@@ -46,7 +46,8 @@
     "react-native-svg": "^12.1.0",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
-    "toggle-switch-react-native": "^2.3.0"
+    "toggle-switch-react-native": "^2.3.0",
+    "expo-constants": "~9.1.1"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0"
