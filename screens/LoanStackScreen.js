@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Alert, Text, Image, ScrollView, StyleSheet, Dimensions, RefreshControl, FlatList, TouchableHighlight } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import ContentLoader from "react-native-easy-content-loader";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { ActivityIndicator, Avatar, } from 'react-native-paper';
@@ -13,33 +12,35 @@ import Ripple from 'react-native-material-ripple';
 import BottomNav from './BottomNav.js';
 const Stack = createStackNavigator();
 var myArray = []
-var api = ""
+var apix = ""
 var sortfield = "Date"
-var map = ['Username', 'EmailID',]
+var total = 0
+var map = ['Name', 'Loan']
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-const UserScreen = ({ route, navigation }) => {
+const LoanScreen = ({ route, navigation }) => {
     const { colors } = useTheme();
     const [loader, setLoader] = React.useState(false)
     const [select1, setSelect1] = React.useState("None")
     const [visible1, setVisible1] = React.useState(false)
+    const [total2,setTotal2]=React.useState(0)
     const [ref, setRef] = React.useState(false)
     const onRefresh = () => {
         if (ref == true) {
             return
         }
         setRef(true);
-        api1(api)
+        api1(apix)
         setTimeout(function () { setRef(false) }, 1500);
 
     }
     const sort = (key) => {
         console.log(key)
         sortfield = key
-        if (key == 'EmailID') {
-            sortfield = "emailId"
-            myArray.sort(comparedate)
-        } else if (key == "Username") {
-            sortfield = "username"
+        if (key == 'Loan') {
+            sortfield = "loan"
+            myArray.sort(compare)
+        } else if (key == "Name") {
+            sortfield = "name"
             myArray.sort(compare)
         }
     }
@@ -67,9 +68,14 @@ const UserScreen = ({ route, navigation }) => {
         try {
             const response = await fetch(api);
             const responseJson = await response.json();
-            myArray = responseJson
-            //console.log(myArray)
-            sort('Username')
+            myArray = [];
+            total = 0
+            for (var i = 0; i < responseJson.length; i++) {
+                myArray.push({ name: responseJson[i].name, loan: responseJson[i].totalloan })
+                total += myArray[i].loan
+            }
+            setTotal2(total)
+            sort('Name')
         } catch (error) {
             console.error(error);
             return await Promise.reject(false);
@@ -77,7 +83,7 @@ const UserScreen = ({ route, navigation }) => {
 
     }
     const deletefun = () => {
-        Alert.alert('Delete User !', 'Are you sure to delete this User ?', [
+        Alert.alert('Delete Holiday !', 'Are you sure to selete the Holiday ?', [
             { text: 'Cancel' },
             { text: 'Okay', onPress: () => console.log("OK Pressed") }
 
@@ -92,12 +98,13 @@ const UserScreen = ({ route, navigation }) => {
             var id = stores[2][1];
             var access = stores[3][1];
             var id2 = stores[4][1];
-            if (myArray.length == 0) {
-                api = 'https://payrollv2.herokuapp.com/users/api/user?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-                await api1(api).then(() => { setLoader(true) })
-            } else {
-                setLoader(true)
+            apix = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            setLoader(true)
+            total = 0
+            for (var i = 0; i < myArray.length; i++) {
+                total += myArray[i].loan
             }
+            setTotal2(total)
 
 
 
@@ -106,14 +113,7 @@ const UserScreen = ({ route, navigation }) => {
     return (
 
         <View style={styles.container}>
-            <View style={styles.touchableOpacityStyle}>
-                <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => navigation.navigate('AddUserStackScreen')}>
-                    <FontAwesome name="plus" size={25} backgroundColor="#fc6a84" color="white" />
-
-                </TouchableOpacity>
-            </View>
+            
             <ScrollView refreshControl={
                 <RefreshControl
                     refreshing={ref}
@@ -137,38 +137,38 @@ const UserScreen = ({ route, navigation }) => {
                             </Ripple>
                         </View>
                     </View>
-                    <View style={[styles.blck, { backgroundColor: '#fc6a84' }]}>
+                    <View style={styles.headig}>
+                        <Text style={[styles.headig2, { color: colors.text }]}>
+                            Total Loan is ₹  {total2}
+                        </Text>
+                    </View>
+                    <View style={[styles.blck, { backgroundColor: '#4d47f5' }]}>
                         <View style={styles.table}>
                             <Text style={[styles.text2, { color: 'white' }]}>
-                                Username
+                                Name
                             </Text>
                             <Text style={[styles.text2, { color: 'white' }]}>
-                                Email ID
+                                Loan
                              </Text >
-                            <Text style={[styles.text2, { color: 'white' }]}>
-                                Actions
-                            </Text>
+
                         </View>
                     </View>
                     {
                         myArray.map((item, key) => {
                             return (
-                                <View key={item.holname}>
+                                <Ripple key={item.name} onPress={() => navigation.navigate('LedgerStackScreen')}>
 
                                     <View style={[styles.blck, { backgroundColor: colors.back2 }]} onPress={() => { }}>
                                         <View style={styles.table}>
 
                                             <Text style={[styles.text, { color: colors.text }]}>
-                                                {item.username}
+                                                {item.name}
                                             </Text>
 
-                                            <Text style={[styles.text, { color: colors.text,width:width/3 }]}>
-                                                {item.emailId}
+                                            <Text style={[styles.text, { color: colors.text }]}>
+                                                {"₹"} {item.loan}
                                             </Text>
-                                            <View style={[styles.text, { color: colors.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }]}>
-                                                <FontAwesome name="pencil" style={[styles.but, { backgroundColor: 'green' }]} size={25} onPress={() => { navigation.navigate('EditUserStackScreen', { user: item }) }} />
-                                                <FontAwesome name="trash-o" size={25} style={[styles.but, { backgroundColor: 'red' }]} onPress={() => deletefun(item)} />
-                                            </View>
+
 
 
 
@@ -176,7 +176,7 @@ const UserScreen = ({ route, navigation }) => {
 
                                     </View>
 
-                                </View>
+                                </Ripple>
                             )
                         })
                     }
@@ -185,7 +185,7 @@ const UserScreen = ({ route, navigation }) => {
                         items={map.map((row, index) => ({ value: index, label: row }))}
                         visible={visible1}
                         selectedItem={select1}
-                        colorAccent={'#fc6a84'}
+                        colorAccent={'#4d47f5'}
                         onCancel={() => setVisible1(false)}
                         scrolled={true}
                         onOk={result => {
@@ -195,19 +195,20 @@ const UserScreen = ({ route, navigation }) => {
                         }}
                     />
 
-                </View> : <ActivityIndicator style={styles.loader} size="large" color="#fc6a84" />}
+                </View> : <ActivityIndicator style={styles.loader} size="large" color="#4d47f5" />}
 
             </ScrollView>
-            <BottomNav name="" color='#fc6a84' navigation={navigation}></BottomNav>
+            <BottomNav name="" color='#4d47f5' navigation={navigation}></BottomNav>
         </View>
     )
 }
 
-const UserStackScreen = ({ navigation }) => {
+const LoanStackScreen = ({ route, navigation }) => {
+    myArray = route.params.totalloan
     return (
         <Stack.Navigator screenOptions={{
             headerStyle: {
-                backgroundColor: '#fc6a84',
+                backgroundColor: '#4d47f5',
             },
             headerTintColor: '#fff',
             headerTitleStyle: {
@@ -215,19 +216,19 @@ const UserStackScreen = ({ navigation }) => {
             }
         }}>
             <Stack.Screen
-                name="Manage Users"
-                component={UserScreen}
+                name="View Loans"
+                component={LoanScreen}
                 options={{
-                    title: ' Manage Users ',
+                    title: ' View Loans ',
                     headerLeft: () => (
-                        <FontAwesome.Button name="bars" size={25} backgroundColor="#fc6a84" onPress={() => navigation.openDrawer()} />
+                        <FontAwesome.Button name="bars" size={25} backgroundColor="#4d47f5" onPress={() => navigation.openDrawer()} />
                     )
                 }}
             />
         </Stack.Navigator>
     );
 }
-export default UserStackScreen;
+export default LoanStackScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -245,11 +246,10 @@ const styles = StyleSheet.create({
         margin: '0.5%',
         borderRadius: 20,
     }, text: {
-        width: width / 3,
-        fontSize: 15,
-        paddingRight:3,
+        width: width / 2,
+        fontSize: 15
     }, text2: {
-        width: width / 3,
+        width: width / 2,
         fontSize: 15,
         fontWeight: 'bold'
     }, table: {
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
         zIndex: 100,
 
         elevation: 7,
-        backgroundColor: '#fc6a84',
+        backgroundColor: '#4d47f5',
 
         right: 30,
         bottom: 72,
@@ -297,5 +297,12 @@ const styles = StyleSheet.create({
         margin: '1%',
         padding: '2%',
         borderRadius: 10,
-    }
+    } ,headig: {
+        flex: 1,
+        justifyContent: "center",
+        flexDirection: "row",
+      }, headig2: {
+        fontWeight: 'bold',
+        fontSize: 20,
+      }, 
 })

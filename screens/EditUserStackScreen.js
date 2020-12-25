@@ -10,12 +10,15 @@ import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
 import BottomNav from './BottomNav.js';
+import { set } from 'react-native-reanimated';
 const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-
+var coloring=""
 const { width, height } = Dimensions.get("screen");
-const AddUserScreen = ({ route, navigation }) => {
+const EditUserScreen = (props, { route, navigation }) => {
   const { colors } = useTheme();
+  navigation=props.navigation
+  coloring=colors
   const [button, setButton] = React.useState(true)
   const [loader, setLoader] = React.useState(false)
   const [ref, setRef] = React.useState(false)
@@ -32,8 +35,6 @@ const AddUserScreen = ({ route, navigation }) => {
 
   const [data, setData] = React.useState({
     username: '',
-    password: '',
-    confirm_password: '',
     mail: '',
     check_textInputChange: false,
     check_name: false,
@@ -73,31 +74,6 @@ const AddUserScreen = ({ route, navigation }) => {
     }
   }
 
-  const handlePasswordChange = (val) => {
-    setData({
-      ...data,
-      password: val
-    });
-  }
-  const updateConfirmSecureTextEntry = () => {
-    setData({
-      ...data,
-      confirm_secureTextEntry: !data.confirm_secureTextEntry
-    });
-  }
-  const handleConfirmPasswordChange = (val) => {
-    setData({
-      ...data,
-      confirm_password: val
-    });
-  }
-
-  const updateSecureTextEntry = () => {
-    setData({
-      ...data,
-      secureTextEntry: !data.secureTextEntry
-    });
-  }
   const onRefresh = () => {
     setRef(true);
     setTimeout(function () { setRef(false) }, 1500);
@@ -111,8 +87,6 @@ const AddUserScreen = ({ route, navigation }) => {
     }
     console.log(data.username)
     console.log(data.mail)
-    console.log(data.password)
-    console.log(data.confirm_password)
 
     setButton(false)
     setTimeout(() => {
@@ -130,12 +104,22 @@ const AddUserScreen = ({ route, navigation }) => {
       var access = stores[3][1];
       var id2 = stores[4][1];
       setLoader(true)
+      var x=props.user
+      data.username=x.username
+      data.mail=x.emailId
+      var arr=x.access.split(";")
+      console.log(arr)
+      setChecked1(arr[0]=="true");setChecked6(arr[5]=="true");
+      setChecked2(arr[1]=="true");setChecked7(arr[6]=="true");
+      setChecked3(arr[2]=="true");setChecked8(arr[7]=="true");
+      setChecked4(arr[3]=="true");setChecked9(arr[8]=="true");
+      setChecked5(arr[4]=="true");setChecked10(arr[9]=="true");
       //console.log(api2)
       //await api1(api).then(() => { setLoader(true) })
 
 
     })
-  }, [navigation])
+  }, [navigation, props])
   return (
     <View style={styles.container}>
       <ScrollView refreshControl={
@@ -167,6 +151,7 @@ const AddUserScreen = ({ route, navigation }) => {
                   style={[styles.textInput,{color:colors.text}]}
                   autoCapitalize="none"
                   onChangeText={(val) => textInputChange(val)}
+                  value={data.username}
                 />
                 {data.check_textInputChange ?
                   <Animatable.View
@@ -195,6 +180,7 @@ const AddUserScreen = ({ route, navigation }) => {
                   style={[styles.textInput,{color:colors.text}]}
                   autoCapitalize="none"
                   onChangeText={(val) => mailfun(val)}
+                  value={data.mail}
                 />
                 {data.check_mail ?
                   <Animatable.View
@@ -208,75 +194,7 @@ const AddUserScreen = ({ route, navigation }) => {
                   </Animatable.View>
                   : null}
               </View>
-              <Text style={[styles.text_footer, {
-                marginTop: 15, color: colors.text
-              }]}>Password</Text>
-              <View style={styles.action}>
-                <Feather
-                  name="lock"
-                  color="red"
-                  size={20}
-                />
-                <TextInput
-                  placeholder="Your Password"
-                  secureTextEntry={data.secureTextEntry ? true : false}
-                  style={[styles.textInput,{color:colors.text}]}
-                  autoCapitalize="none"
-                  onChangeText={(val) => handlePasswordChange(val)}
-                />
-                <TouchableOpacity
-                  onPress={updateSecureTextEntry}
-                >
-                  {data.secureTextEntry ?
-                    <Feather
-                      name="eye-off"
-                      color="grey"
-                      size={20}
-                    />
-                    :
-                    <Feather
-                      name="eye"
-                      color="grey"
-                      size={20}
-                    />
-                  }
-                </TouchableOpacity>
-              </View>
-
-              <Text style={[styles.text_footer, {
-                marginTop: 15, color: colors.text
-              }]}>Confirm Password</Text>
-              <View style={styles.action}>
-                <Feather
-                  name="lock"
-                  color="red"
-                  size={20}
-                />
-                <TextInput
-                  placeholder="Confirm Your Password"
-                  secureTextEntry={data.confirm_secureTextEntry ? true : false}
-                  style={[styles.textInput,{color:colors.text}]}
-                  autoCapitalize="none"
-                  onChangeText={(val) => handleConfirmPasswordChange(val)}
-                />
-                <TouchableOpacity
-                  onPress={updateConfirmSecureTextEntry}
-                >
-                  {data.secureTextEntry ?
-                    <Feather
-                      name="eye-off"
-                      color="grey"
-                      size={20}
-                    />
-                    :
-                    <Feather
-                      name="eye"
-                      color="grey"
-                      size={20}
-                    />
-                  }
-                </TouchableOpacity>
-              </View>
+              
               <Text style={[styles.text_footer, {
                 marginTop: 20,marginBottom:15, color: colors.text
               }]}>Module Access</Text>
@@ -343,7 +261,7 @@ const AddUserScreen = ({ route, navigation }) => {
               </View>
 
               <View style={{ flex: 1, flexDirection: 'row', width: '100%',  alignItems: 'center' }}>
-                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text, }]}>
+                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text }]}>
                   Attendance
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
@@ -450,7 +368,7 @@ const AddUserScreen = ({ route, navigation }) => {
                   >
                     <Text style={[styles.textSign, {
                       color: '#fff'
-                    }]}>Add User</Text>
+                    }]}>Save</Text>
                     {!button ? <ActivityIndicator style={{ marginLeft: "5%" }} size="small" color="white" /> : null}
                   </LinearGradient>
                 </TouchableOpacity>
@@ -473,7 +391,7 @@ const AddUserScreen = ({ route, navigation }) => {
   )
 }
 
-const AddUserStackScreen = ({ route, navigation }) => {
+const EditUserStackScreen = ({ route, navigation }) => {
 
   return (
     <Stack.Navigator screenOptions={{
@@ -486,19 +404,18 @@ const AddUserStackScreen = ({ route, navigation }) => {
       }
     }}>
       <Stack.Screen
-        name="Add User"
-        component={AddUserScreen}
+        name="Edit User"
         options={{
-          title: 'Add User ',
+          title: 'Edit User ',
           headerLeft: () => (
             <FontAwesome.Button name="bars" size={25} backgroundColor="#fc6a84" onPress={() => navigation.openDrawer()} />
           )
         }}
-      />
+      >{props => <EditUserScreen user={route.params.user} />}</Stack.Screen>
     </Stack.Navigator>
   );
 }
-export default AddUserStackScreen;
+export default EditUserStackScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -532,7 +449,7 @@ const styles = StyleSheet.create({
   },
   text_footer: {
     color: '#05375a',
-    fontSize: 18,
+    fontSize: 18
   },
   action: {
     flexDirection: 'row',

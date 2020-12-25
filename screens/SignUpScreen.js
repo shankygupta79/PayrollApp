@@ -67,13 +67,13 @@ const SignInScreen = ({ navigation }) => {
         if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val)) {
             setData({
                 ...data,
-                name: val,
+                mail: val,
                 check_mail: true
             });
         } else {
             setData({
                 ...data,
-                name: val,
+                mail: val,
                 check_mail: false
             });
         }

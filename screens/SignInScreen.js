@@ -20,6 +20,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import { useTheme } from 'react-native-paper';
 import { AuthContext } from '../components/context';
+import { ScrollView } from 'react-native-gesture-handler';
 
 async function registerForPushNotificationsAsync() {
     let token;
@@ -302,6 +303,7 @@ const SignInScreen = ({ navigation }) => {
                     backgroundColor: colors.background
                 }]}
             >
+                <ScrollView>
                 <Text style={[styles.text_footer, {
                     color: colors.text
                 }]}>Email</Text>
@@ -452,6 +454,8 @@ const SignInScreen = ({ navigation }) => {
                         }]}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>
+               
+                </ScrollView>
             </Animatable.View>
         </View>
     );

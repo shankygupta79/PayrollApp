@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Alert, Text, Image, ScrollView, StyleSheet, Dimensions, RefreshControl, FlatList, TouchableHighlight } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import ContentLoader from "react-native-easy-content-loader";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { ActivityIndicator, Avatar, } from 'react-native-paper';
-import AsyncStorage from '@react-native-community/async-storage';
+
 import { SinglePickerMaterialDialog } from 'react-native-material-dialog';
+import AsyncStorage from '@react-native-community/async-storage';
 import { useTheme } from '@react-navigation/native';
 const { width, height } = Dimensions.get("screen");
 import Ripple from 'react-native-material-ripple';
@@ -15,9 +15,9 @@ const Stack = createStackNavigator();
 var myArray = []
 var api = ""
 var sortfield = "Date"
-var map = ['Username', 'EmailID',]
+var map = ['Name', 'Employee Count']
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-const UserScreen = ({ route, navigation }) => {
+const DepScreen = ({ route, navigation }) => {
     const { colors } = useTheme();
     const [loader, setLoader] = React.useState(false)
     const [select1, setSelect1] = React.useState("None")
@@ -35,13 +35,14 @@ const UserScreen = ({ route, navigation }) => {
     const sort = (key) => {
         console.log(key)
         sortfield = key
-        if (key == 'EmailID') {
-            sortfield = "emailId"
-            myArray.sort(comparedate)
-        } else if (key == "Username") {
-            sortfield = "username"
-            myArray.sort(compare)
+        console.log(key)
+        if (key == 'Name') {
+            sortfield = "dep"
+        } else if (key == "Employee Count") {
+            sortfield = "depcount"
         }
+        myArray.sort(compare)
+
     }
     const compare = (a, b) => {
         var nameA = a[sortfield]
@@ -50,26 +51,14 @@ const UserScreen = ({ route, navigation }) => {
         if (nameA > nameB) { return 1; }
         return 0;
     }
-    const comparedate = (a, b) => {
-        var nameA = a[sortfield]
-        var nameB = b[sortfield]
-        nameA = nameA.slice(6, 10) + nameA.slice(3, 5) + nameA.slice(0, 2)
-        nameB = nameB.slice(6, 10) + nameB.slice(3, 5) + nameB.slice(0, 2)
-        if (nameA < nameB) {
-            return -1;
-        }
-        if (nameA > nameB) {
-            return 1;
-        }
-        return 0;
-    }
+
     const api1 = async (api) => {
         try {
             const response = await fetch(api);
             const responseJson = await response.json();
             myArray = responseJson
-            //console.log(myArray)
-            sort('Username')
+            console.log(myArray)
+            sort('Name')
         } catch (error) {
             console.error(error);
             return await Promise.reject(false);
@@ -77,7 +66,7 @@ const UserScreen = ({ route, navigation }) => {
 
     }
     const deletefun = () => {
-        Alert.alert('Delete User !', 'Are you sure to delete this User ?', [
+        Alert.alert('Delete Dep !', 'Are you sure to selete the Dep ?', [
             { text: 'Cancel' },
             { text: 'Okay', onPress: () => console.log("OK Pressed") }
 
@@ -93,7 +82,7 @@ const UserScreen = ({ route, navigation }) => {
             var access = stores[3][1];
             var id2 = stores[4][1];
             if (myArray.length == 0) {
-                api = 'https://payrollv2.herokuapp.com/users/api/user?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+                api = 'https://payrollv2.herokuapp.com/department/api/dep2?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
                 await api1(api).then(() => { setLoader(true) })
             } else {
                 setLoader(true)
@@ -109,8 +98,8 @@ const UserScreen = ({ route, navigation }) => {
             <View style={styles.touchableOpacityStyle}>
                 <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => navigation.navigate('AddUserStackScreen')}>
-                    <FontAwesome name="plus" size={25} backgroundColor="#fc6a84" color="white" />
+                    onPress={() => navigation.navigate('AddDepStackScreen')}>
+                    <FontAwesome name="plus" size={25} backgroundColor="#c2ba4a" color="white" />
 
                 </TouchableOpacity>
             </View>
@@ -137,14 +126,16 @@ const UserScreen = ({ route, navigation }) => {
                             </Ripple>
                         </View>
                     </View>
-                    <View style={[styles.blck, { backgroundColor: '#fc6a84' }]}>
+                    <View style={[styles.blck, { backgroundColor: '#c2ba4a' }]}>
                         <View style={styles.table}>
+
                             <Text style={[styles.text2, { color: 'white' }]}>
-                                Username
+                                Name
                             </Text>
                             <Text style={[styles.text2, { color: 'white' }]}>
-                                Email ID
+                                Employee
                              </Text >
+
                             <Text style={[styles.text2, { color: 'white' }]}>
                                 Actions
                             </Text>
@@ -158,16 +149,16 @@ const UserScreen = ({ route, navigation }) => {
                                     <View style={[styles.blck, { backgroundColor: colors.back2 }]} onPress={() => { }}>
                                         <View style={styles.table}>
 
-                                            <Text style={[styles.text, { color: colors.text }]}>
-                                                {item.username}
-                                            </Text>
 
-                                            <Text style={[styles.text, { color: colors.text,width:width/3 }]}>
-                                                {item.emailId}
+                                            <Text style={[styles.text, { color: colors.text }]}>
+                                                {item.dep}
                                             </Text>
-                                            <View style={[styles.text, { color: colors.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }]}>
-                                                <FontAwesome name="pencil" style={[styles.but, { backgroundColor: 'green' }]} size={25} onPress={() => { navigation.navigate('EditUserStackScreen', { user: item }) }} />
-                                                <FontAwesome name="trash-o" size={25} style={[styles.but, { backgroundColor: 'red' }]} onPress={() => deletefun(item)} />
+                                            <Text style={[styles.text, { color: colors.text }]}>
+                                                {item.depcount}
+                                            </Text>
+                                            <View style={[styles.text, { color: colors.text, flexDirection: 'row', }]}>
+                                                <FontAwesome name="trash-o" size={25} style={[styles.but, { backgroundColor: 'red' }]} onPress={() => deletefun(item)} >
+                                                    <Text style={{ fontSize: 15 }}></Text></FontAwesome>
                                             </View>
 
 
@@ -180,12 +171,23 @@ const UserScreen = ({ route, navigation }) => {
                             )
                         })
                     }
+                    <View style={{ margin: '3%',padding:2, flexDirection: 'row', backgroundColor: "#61b55e", borderRadius: 10, alignItems: 'center' }}>
+                        <Text>
+                            {"  "}
+                        </Text>
+                        <FontAwesome name="exclamation-triangle" size={25} style={[{ backgroundColor: colors.backgroundColor, color: colors.text, }]} onPress={() => deletefun(item)} />
+
+                        <Text style={{color:colors.text,fontSize:12,marginRight:'7%',marginLeft:'3%'}}>
+                            Newly Added Department will be shown if you add atleast one employee in it ! !
+                        </Text>
+                    </View>
+
                     <SinglePickerMaterialDialog
                         title={'Select Sort By '}
                         items={map.map((row, index) => ({ value: index, label: row }))}
                         visible={visible1}
                         selectedItem={select1}
-                        colorAccent={'#fc6a84'}
+                        colorAccent={'#c2ba4a'}
                         onCancel={() => setVisible1(false)}
                         scrolled={true}
                         onOk={result => {
@@ -194,20 +196,19 @@ const UserScreen = ({ route, navigation }) => {
                             setSelect1(result.selectedItem.label);
                         }}
                     />
-
-                </View> : <ActivityIndicator style={styles.loader} size="large" color="#fc6a84" />}
+                </View> : <ActivityIndicator style={styles.loader} size="large" color="#c2ba4a" />}
 
             </ScrollView>
-            <BottomNav name="" color='#fc6a84' navigation={navigation}></BottomNav>
+            <BottomNav name="" color='#c2ba4a' navigation={navigation}></BottomNav>
         </View>
     )
 }
 
-const UserStackScreen = ({ navigation }) => {
+const DepStackScreen = ({ navigation }) => {
     return (
         <Stack.Navigator screenOptions={{
             headerStyle: {
-                backgroundColor: '#fc6a84',
+                backgroundColor: '#c2ba4a',
             },
             headerTintColor: '#fff',
             headerTitleStyle: {
@@ -215,19 +216,19 @@ const UserStackScreen = ({ navigation }) => {
             }
         }}>
             <Stack.Screen
-                name="Manage Users"
-                component={UserScreen}
+                name="Manage Departments "
+                component={DepScreen}
                 options={{
-                    title: ' Manage Users ',
+                    title: ' Manage Departments ',
                     headerLeft: () => (
-                        <FontAwesome.Button name="bars" size={25} backgroundColor="#fc6a84" onPress={() => navigation.openDrawer()} />
+                        <FontAwesome.Button name="bars" size={25} backgroundColor="#c2ba4a" onPress={() => navigation.openDrawer()} />
                     )
                 }}
             />
         </Stack.Navigator>
     );
 }
-export default UserStackScreen;
+export default DepStackScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -246,12 +247,11 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     }, text: {
         width: width / 3,
-        fontSize: 15,
-        paddingRight:3,
+        fontSize: 15
     }, text2: {
         width: width / 3,
         fontSize: 15,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
     }, table: {
         flex: 1,
         flexDirection: 'row',
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
         zIndex: 100,
 
         elevation: 7,
-        backgroundColor: '#fc6a84',
+        backgroundColor: '#c2ba4a',
 
         right: 30,
         bottom: 72,

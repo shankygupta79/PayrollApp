@@ -16,13 +16,13 @@ const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 var date = "01-01-2000"
 const { width, height } = Dimensions.get("screen");
-const AddHolScreen = ({ route, navigation }) => {
+const EditHolScreen = (props,  {navigation} ) => {
   const { colors } = useTheme();
-
+  navigation=props.navigation
   const [loader, setLoader] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [ref, setRef] = React.useState(false)
-  var sortfield="Date"
+
   const [isDatePickerVisible, setDatePickerVisibility] = React.useState(false);
   const handleNameChange = (val) => { setData({ ...data, name: val }); }
   const handleConfirm = (dat) => {
@@ -69,13 +69,17 @@ const AddHolScreen = ({ route, navigation }) => {
       var id = stores[2][1];
       var access = stores[3][1];
       var id2 = stores[4][1];
+      console.log(props.hol)
+      date = props.hol.date
+      console.log(props.hol.holname)
+      setData({ ...data, name: props.hol.holname })
       setLoader(true)
       //console.log(api2)
       //await api1(api).then(() => { setLoader(true) })
 
 
     })
-  }, [navigation])
+  }, [navigation, props])
   return (
     <View style={styles.container}>
       <ScrollView refreshControl={
@@ -87,7 +91,7 @@ const AddHolScreen = ({ route, navigation }) => {
           <Animatable.View
             animation="fadeInUpBig"
             style={[
-              styles.card, { backgroundColor: colors.backgroundColor }
+              styles.card, { backgroundColor: colors.back2 }
             ]}>
 
 
@@ -95,7 +99,7 @@ const AddHolScreen = ({ route, navigation }) => {
               <Text style={[styles.heading, { color: colors.text }]}>
                 Date </Text>
               <TouchableOpacity onPress={() => showDatePicker()} style={[styles.textInput, { flexDirection: 'row' }]}>
-                <FontAwesome name="calendar" size={20} color="orange" style={{ marginRight: 8 }} />
+                <FontAwesome name="calendar" size={20} color="blue" style={{ marginRight: 8 }} />
                 <Text style={{ color: colors.text }}>
                   {date}
                 </Text>
@@ -112,9 +116,10 @@ const AddHolScreen = ({ route, navigation }) => {
                 style={[styles.textInput, { color: colors.text }]}
                 autoCapitalize="none"
                 onChangeText={(val) => handleNameChange(val)}
+                value={data.name}
               />
             </View>
-          
+          </Animatable.View>
           <DateTimePickerModal
             isVisible={isDatePickerVisible}
             mode="date"
@@ -144,7 +149,6 @@ const AddHolScreen = ({ route, navigation }) => {
               </LinearGradient>
             </TouchableOpacity>
           </View>
-          </Animatable.View>
 
 
         </View> : <ActivityIndicator style={styles.loader} size="large" color="orange" />}
@@ -155,8 +159,8 @@ const AddHolScreen = ({ route, navigation }) => {
   )
 }
 
-const AddHolStackScreen = ({ route, navigation }) => {
-
+const EditHolStackScreen = ({ route, navigation }) => {
+  var hol = route.params.hol
   return (
     <Stack.Navigator screenOptions={{
       headerStyle: {
@@ -168,19 +172,18 @@ const AddHolStackScreen = ({ route, navigation }) => {
       }
     }}>
       <Stack.Screen
-        name="Add Holiday"
-        component={AddHolScreen}
+        name="Edit Holiday"
         options={{
-          title: 'Add Holiday ',
+          title: 'Edit Holiday ',
           headerLeft: () => (
             <FontAwesome.Button name="bars" size={25} backgroundColor="orange" onPress={() => navigation.openDrawer()} />
           )
         }}
-      />
+      >{props => <EditHolScreen {...props} hol={hol} />}</Stack.Screen>
     </Stack.Navigator>
   );
 }
-export default AddHolStackScreen;
+export default EditHolStackScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -223,9 +226,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
 
   }, heading: {
-    marginTop: 15,
-    color: '#05375a',
-    fontSize: 18,
+    fontWeight: 'bold',
     width: "40%"
   }, card: {
     marginTop: '2%',

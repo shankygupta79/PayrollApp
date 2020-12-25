@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text,Image, ScrollView, StyleSheet, Dimensions, RefreshControl,} from 'react-native';
+import { Alert, View, Text, Image, ScrollView, StyleSheet, Dimensions, RefreshControl, } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ContentLoader from "react-native-easy-content-loader";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -7,33 +7,41 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Avatar, } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useTheme } from '@react-navigation/native';
+import * as Animatable from 'react-native-animatable';
+import BottomNav from './BottomNav.js';
+import { SinglePickerMaterialDialog } from 'react-native-material-dialog';
+import Ripple from 'react-native-material-ripple';
 var { width, height } = Dimensions.get('window');
 const Stack = createStackNavigator();
 var sortfield = 'status'
-var sortfield2 = 'Status'
 var myArray = []
+var myArray2 = []
+var id=""
+var apix = ""
+var map = ["Name", "Status", "Date of Joining", "Designation"]
 const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 const EmployeeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const [visible, setVisible] = React.useState(false);
   const [loader, setLoader] = React.useState(false)
+  const [showin, setShowin] = React.useState(false)
   const toggleOverlay = () => {
     setVisible(!visible);
   };
   const sort = (key) => {
     console.log(key)
     sortfield = key
-    if (key == 'doj') {
-      sortfield2 = "Date of Joining"
+    if (key == 'Date of Joining') {
+      sortfield = "doj"
       myArray.sort(comparedate)
-    } else if (key == "des") {
-      sortfield2 = "Designation"
+    } else if (key == "Designation") {
+      sortfield = "des"
       myArray.sort(compare)
-    } else if (key == "name") {
-      sortfield2 = "Name"
+    } else if (key == "Name") {
+      sortfield = "name"
       myArray.sort(compare)
     } else {
-      sortfield2 = "Status"
+      sortfield = "status"
       myArray.sort(compare)
     }
 
@@ -41,8 +49,11 @@ const EmployeeScreen = ({ navigation }) => {
     //console.log(myArray)
   }
   const [ref, setRef] = React.useState(false)
+  const [select1, setSelect1] = React.useState("None")
+  const [visible1, setVisible1] = React.useState(false)
   const onRefresh = () => {
     setRef(true);
+    api1(apix);
     setTimeout(function () { setRef(false) }, 1500);
 
   }
@@ -66,129 +77,239 @@ const EmployeeScreen = ({ navigation }) => {
     }
     return 0;
   }
+  const api1 = async (api) => {
+    try {
+      const response = await fetch(api);
+      const responseJson = await response.json();
+      myArray = []
+      myArray2=[]
+      for (var i = 0; i < responseJson.length; i++) {
+        if (responseJson[i].status == 'Active') {
+          myArray.push(responseJson[i])
+        } else {
+          myArray2.push(responseJson[i])
+        }
+      }
+      console.log("Loaded")
+    } catch (error) {
+      console.error(error);
+      return await Promise.reject(false);
+    }
+
+  }
   React.useEffect(() => {
     AsyncStorage.multiGet(keys, (err, stores) => {
       setLoader(false)
       var admin = stores[0][1];
       var off = stores[1][1];
-      var id = stores[2][1];
+      id = stores[2][1];
       var access = stores[3][1];
       var id2 = stores[4][1];
-      api = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       console.log(api)
+      if (myArray.length == 0) {
+        apix = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+        api1(apix).then(() => { setLoader(true) })
+      } else {
+        setLoader(true)
+      }
 
-      fetch(api)
-        .then((response) => response.json())
-        .then((responseJson) => {
-
-          myArray = responseJson
-          //console.log(myArray)
-
-          //sort('status')
-          setLoader(true)
-        }
-        )
-        .catch((error) => {
-          console.error(error);
-        });
 
 
     });
-  }, [navigation])
+  }, [navigation,id])
   return (
 
     <View style={styles.container}>
       <View style={styles.touchableOpacityStyle}>
-                <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => navigation.navigate('AddHolStackScreen')}>
-                    <FontAwesome name="plus" size={25} backgroundColor="orange" color="white" />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('AddEmpStackScreen')}>
+          <FontAwesome name="plus" size={25} backgroundColor="orange" color="white" />
 
-                </TouchableOpacity>
-            </View>
-      {loader ? <ScrollView refreshControl={
+        </TouchableOpacity>
+      </View>
+      <ScrollView refreshControl={
         <RefreshControl
           refreshing={ref}
           onRefresh={onRefresh}
         />}>
-        
 
-        
-        <View style={{ backgroundColor: "#f2f5f2", padding: 5, flex: 1, alignItems: 'center',elevation:5, }}>
-          <TouchableOpacity onPress={toggleOverlay}><Text style={{ borderColor: '#c8ccc9', borderWidth: 1, padding: 5, borderRadius: 10,fontFamily: "sans-serif-medium",backgroundColor:'white' }}>Sort By : {sortfield2}</Text></TouchableOpacity></View>
-        
-          
-          {visible ? <View style={styles.overlay}>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity onPress={() => sort('name')}><Text style={[styles.sortbut, { backgroundColor: 'name' === sortfield ? "#faf0cd" : "#ffff" }, { borderColor: 'name' === sortfield ? "orange" : "black" }]}>Name</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => sort('status')}><Text style={[styles.sortbut, { backgroundColor: 'status' === sortfield ? "#F7EABE" : "#ffff" }, { borderColor: 'status' === sortfield ? "orange" : "black" }]}>Status</Text></TouchableOpacity>
+
+        {loader ? <View>
+
+
+
+          <View style={[styles.sort]}>
+            <Ripple style={[styles.sort2, { backgroundColor: colors.back2 }]} onPress={() => { setShowin(!showin) }}>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }} >
+
+                <Text style={{ fontWeight: 'bold', color: colors.text }}>
+                  {""} Show In-Actives {" "}
+                </Text>
+
+                {!showin ? <FontAwesome name="caret-up" size={18} color={colors.text} /> :
+                  <FontAwesome name="caret-down" size={18} color={colors.text} />
+                }
+
+
+              </View>
+
+            </Ripple>
+            <Ripple style={[styles.sort2, { backgroundColor: colors.back2 }]} onPress={() => { setVisible1(!visible1) }}>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }} >
+
+                <Text style={{ fontWeight: 'bold', color: colors.text }}>
+                  {""} Sort By :
+                                </Text>
+                <Text style={{ color: colors.text }}>
+                  {" "}{select1}{"  "}
+                </Text>
+                <FontAwesome name="sort-alpha-desc" size={18} color={colors.text} />
+
+
+              </View>
+
+            </Ripple>
+          </View>
+          <SinglePickerMaterialDialog
+            title={'Select Sort By '}
+            items={map.map((row, index) => ({ value: index, label: row }))}
+            visible={visible1}
+            selectedItem={select1}
+            colorAccent={'green'}
+            onCancel={() => setVisible1(false)}
+            scrolled={true}
+            onOk={result => {
+              setVisible1(false);
+              sort(result.selectedItem.label)
+              setSelect1(result.selectedItem.label);
+            }}
+          />
+          <ScrollView style={[{ marginTop: 5 }]}
+
+          >
+            <View style={[styles.blck, { backgroundColor: 'green' }]}>
+              <View style={{alignItems:'center'}}>
+                <Text style={[styles.text2, { color: 'white' }]}>
+                  Active Employees
+                            </Text>
+
+              </View>
             </View>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity onPress={() => sort('doj')}><Text style={[styles.sortbut, { backgroundColor: 'doj' === sortfield ? "#F7EABE" : "#ffff" }, { borderColor: 'doj' === sortfield ? "orange" : "black" }]}>Date of Joining</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => sort('des')}><Text style={[styles.sortbut, { backgroundColor: 'des' === sortfield ? "#F7EABE" : "#ffff" }, { borderColor: 'des' === sortfield ? "orange" : "black" }]}>Designation</Text></TouchableOpacity>
-            </View>
-          </View> : null}
-          <ScrollView style={[{marginTop:5}]}
 
-        >
-          
-          {myArray.map((item, key) => {
-            return <View style={{ borderBottomColor: "grey", borderBottomWidth: 1 }} key={item.name} >
-              <TouchableOpacity style={[styles.list, {
-                backgroundColor: colors.background
-              }]} onPress={() => {
-                navigation.navigate('EditEmpStackScreen', { emp_id: item.emp_id })
-              }
-              }>
+            {myArray.map((item, key) => {
+              return <Animatable.View
+                animation="fadeInUpBig"
+                style={{ borderRadius: 20, margin: '0.5%', backgroundColor: colors.back2 }} key={item.name} >
+                <Ripple rippleDuration={200} rippleColor="rgb(100, 100, 100)" style={[styles.list, {
+
+                }]} onPress={() => {
+                  navigation.navigate('EditEmpStackScreen', { emp_id: item.emp_id })
+                }
+                }>
 
 
 
-                <Avatar.Image size={74} source={{ uri: item.photo }} />
-                <View style={{ flex: 6, flexDirection: 'column' }}>
-                  <View style={{ flex: 1, alignItems: 'center', }}>
-                    <Text style={[{ fontSize: 18, width: "50%", color: colors.text, fontWeight: 'bold' }]} numberOfLines={2}>{item.name} </Text>
+                  <Avatar.Image size={74} source={{ uri: item.photo }} />
+                  <View style={{ flex: 1, flexDirection: 'column', width: width * 0.7 }}>
+                    <View style={{ alignItems: 'center', width: width * 0.7 }}>
+                      <Text style={[{ fontSize: 18, paddingBottom: 4, color: colors.text, fontWeight: 'bold' }]} numberOfLines={2}>{item.name} </Text>
+                    </View>
+                    <View style={[{ alignItems: 'center', width: width * 0.7 }]}>
+
+                      <Text style={{ color: colors.text }} numberOfLines={1}>
+                        {item.des}
+                      </Text>
+                    </View>
+                    <View style={[{ alignItems: 'center', width: width * 0.7 }]}>
+
+                      <Text style={{ color: colors.text }}>
+                        ₹{item.salary}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.table}>
-                    <Text style={{ color: colors.text, }} numberOfLines={1}>
-                      ID : {item.emp_id}
-                    </Text>
-                    <Text style={{ color: colors.text, marginLeft: "40%" }} numberOfLines={1}>
-                      {item.des}
-                    </Text>
-                  </View>
-                  <View style={styles.table}>
-                    <Text style={{ color: colors.text }}>
-                      {item.doj}
-                    </Text >
-                    <Text style={{ color: colors.text }}>
-                      ₹{item.salary}
-                    </Text>
-                  </View>
-                </View>
 
-              </TouchableOpacity>
+                </Ripple>
 
-            </View>
+
+              </Animatable.View>
+
+
+
+
+            }
+
+            )}
             
+            {showin ?
+              <View>
+                <View style={[styles.blck, { backgroundColor: 'green' }]}>
+              <View style={{alignItems:'center'}}>
+                <Text style={[styles.text2, { color: 'white' }]}>
+                  In - Active Employees
+                            </Text>
+
+              </View>
+            </View>
+                {myArray2.map((item, key) => {
+                  return <Animatable.View
+                    animation="fadeInUpBig"
+                    style={{ borderRadius: 20, margin: '0.5%', backgroundColor: colors.back2 }} key={item.name} >
+                    <Ripple rippleDuration={200} rippleColor="rgb(100, 100, 100)" style={[styles.list, {
+
+                    }]} onPress={() => {
+                      navigation.navigate('EditEmpStackScreen', { emp_id: item.emp_id })
+                    }
+                    }>
 
 
-          }
-          
-          )}</ScrollView>
 
+                      <Avatar.Image size={74} source={{ uri: item.photo }} />
+                      <View style={{ flex: 1, flexDirection: 'column', width: width * 0.7 }}>
+                        <View style={{ alignItems: 'center', width: width * 0.7 }}>
+                          <Text style={[{ fontSize: 18, paddingBottom: 4, color: colors.text, fontWeight: 'bold' }]} numberOfLines={2}>{item.name} </Text>
+                        </View>
+                        <View style={[{ alignItems: 'center', width: width * 0.7 }]}>
+
+                          <Text style={{ color: colors.text }} numberOfLines={1}>
+                            {item.des}
+                          </Text>
+                        </View>
+                        <View style={[{ alignItems: 'center', width: width * 0.7 }]}>
+
+                          <Text style={{ color: colors.text }}>
+                            ₹{item.salary}
+                          </Text>
+                        </View>
+                      </View>
+
+                    </Ripple>
+
+
+                  </Animatable.View>
+
+
+
+
+                }
+
+                )}</View> : null}
+          </ScrollView>
+        </View>
+
+          :
+          <View style={styles.loader}>
+
+            <ContentLoader
+              active
+              avatar
+              pRows={2}
+              loading={true}
+              listSize={6}
+              containerStyles={styles.loader}
+            ></ContentLoader></View>}
       </ScrollView>
-        :
-        <View style={styles.loader}>
-
-          <ContentLoader
-            active
-            avatar
-            pRows={2}
-            loading={true}
-            listSize={6}
-            containerStyles={styles.loader}
-          ></ContentLoader></View>}
-
+      <BottomNav name="Employee" color='green' navigation={navigation}></BottomNav>
     </View >
   );
 };
@@ -203,6 +324,7 @@ const EmployeeStackScreen = ({ navigation }) => {
       headerTitleStyle: {
         fontWeight: 'bold'
       }
+
     }}>
       <Stack.Screen
         name="Employees"
@@ -213,6 +335,7 @@ const EmployeeStackScreen = ({ navigation }) => {
             <FontAwesome.Button name="bars" size={25} backgroundColor="green" onPress={() => navigation.openDrawer()} />
           )
         }}
+
       />
     </Stack.Navigator>
   );
@@ -230,7 +353,7 @@ const styles = StyleSheet.create({
     margin: "0%",
     padding: "5%",
     backgroundColor: "#f2f5f2",
-    elevation:5,
+    elevation: 5,
   }, list: {
     flex: 1,
     flexDirection: 'row',
@@ -238,14 +361,14 @@ const styles = StyleSheet.create({
     marginLeft: "3%",
     marginRight: "3%",
     marginTop: "2%",
-    padding:1,
-    marginBottom:"1%",
+    padding: 1,
+    marginBottom: "1%",
   }, table: {
     flex: 2,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginLeft: "10%",
-    marginRight: "15%",zIndex:0,
+    marginRight: "15%", zIndex: 0,
   }, sortbut: {
     borderColor: 'black',
     borderRadius: 10,
@@ -254,30 +377,48 @@ const styles = StyleSheet.create({
     padding: 5,
     margin: "5%",
     alignItems: 'center',
-    backgroundColor:'white',
-    paddingLeft:"5%"
+    backgroundColor: 'white',
+    paddingLeft: "5%"
   }, touchableOpacityStyle: {
     resizeMode: 'contain',
-        width: 50,
-        height: 50,
-        borderRadius: 50,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.29,
-        shadowRadius: 4.65,
-        zIndex: 100,
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.29,
+    shadowRadius: 4.65,
+    zIndex: 100,
 
-        elevation: 7,
-        backgroundColor: 'green',
+    elevation: 7,
+    backgroundColor: 'green',
 
-        right: 30,
-        bottom: 30,
-        position: 'absolute'
-    
+    right: 30,
+    bottom: 72,
+    position: 'absolute'
+
+  }, sort: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    margin: '0.1%',
+    padding: '1%',
+  }, sort2: {
+    marginRight: '3%',
+    margin: '1%',
+    padding: '2%',
+    borderRadius: 10,
+  }, blck: {
+    padding: "2%",
+    margin: '0.5%',
+    borderRadius: 20,
+  }, text2: {
+    fontSize: 15,
+    fontWeight:'bold'
   },
 });

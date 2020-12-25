@@ -59,13 +59,13 @@ export function DrawerContent(props) {
                             icon={({ color, size }) => (
                                 <FontAwesome
                                     name="home"
-                                    color="#7b79fc"
+                                    color="red"
                                     size={size}
                                 />
                             )}
                             label="Home"
                             onPress={() => {
-                                props.navigation.navigate('Home');
+                                props.navigation.navigate('HomeStackScreen');
                             }}
                         />
                         <DrawerItem
@@ -99,26 +99,26 @@ export function DrawerContent(props) {
                             icon={({ color, size }) => (
                                 <FontAwesome
                                     name="book"
-                                    color="#1cffd2"
+                                    color="#4d47f5"
                                     size={size}
                                 />
                             )}
                             label="Salary Ledger"
                             onPress={() => {
-                                props.navigation.navigate('SupportScreen');
+                                props.navigation.navigate('LedgerStackScreen');
                             }}
                         />
                         <DrawerItem
                             icon={({ color, size }) => (
                                 <FontAwesome
-                                    name="credit-card"
-                                    color="red"
+                                    name="calculator"
+                                    color="magenta"
                                     size={size}
                                 />
                             )}
-                            label="Loans & Advance"
+                            label="Salary Calculator"
                             onPress={() => {
-                                props.navigation.navigate('SupportScreen');
+                                props.navigation.navigate('CalcStackScreen');
                             }}
                         />
                         
@@ -145,7 +145,7 @@ export function DrawerContent(props) {
                             )}
                             label="Departments"
                             onPress={() => {
-                                props.navigation.navigate('SettingsScreen');
+                                props.navigation.navigate('DepStackScreen');
                             }}
                         />
                         <DrawerItem

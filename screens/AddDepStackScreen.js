@@ -1,7 +1,6 @@
 import React from 'react';
 import { Alert, View, Text, TextInput, Image, ScrollView, StyleSheet, Dimensions, RefreshControl, FlatList, TouchableHighlight } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import ContentLoader from "react-native-easy-content-loader";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -16,20 +15,15 @@ const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 var date = "01-01-2000"
 const { width, height } = Dimensions.get("screen");
-const AddHolScreen = ({ route, navigation }) => {
+const AddDepScreen = ({  navigation }) => {
   const { colors } = useTheme();
-
+  console.log(navigation)
+  console.log("Hey")
   const [loader, setLoader] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [ref, setRef] = React.useState(false)
-  var sortfield="Date"
-  const [isDatePickerVisible, setDatePickerVisibility] = React.useState(false);
   const handleNameChange = (val) => { setData({ ...data, name: val }); }
-  const handleConfirm = (dat) => {
-    console.log("A date has been picked: ", dat);
-    date = dat.getDate() + "-" + (dat.getMonth() + 1) + "-" + dat.getFullYear()
-    hideDatePicker();
-  };
+  
   const [data, setData] = React.useState({
     name: '',
   })
@@ -40,10 +34,13 @@ const AddHolScreen = ({ route, navigation }) => {
   }
   
   const save = () => {
-    console.log(data.name)
-    console.log(date)
+    if(saving==true){
+      return
+    }
+    setSaving(true)
+    
     if (data.name == "") {
-      Alert.alert('Enter Name!', 'Holiday Name Field Cannot Be Empty.', [
+      Alert.alert('Enter Name!', 'Department Name Field Cannot Be Empty.', [
         { text: 'Okay' }
       ]);
 
@@ -51,16 +48,13 @@ const AddHolScreen = ({ route, navigation }) => {
       return
 
     }
-    setSaving(true)
-    setSaving(false)
+    
+    setTimeout(()=>{
+      console.log(data.name)
+      setSaving(false)
+    },5000)
   };
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-  const hideDatePicker = () => {
-
-    setDatePickerVisibility(false);
-  };
+  
   React.useEffect(() => {
     AsyncStorage.multiGet(keys, async (err, stores) => {
       setLoader(false)
@@ -85,43 +79,27 @@ const AddHolScreen = ({ route, navigation }) => {
         />}>
         {loader ? <View>
           <Animatable.View
-            animation="fadeInUpBig"
+            animation="bounceInLeft"
             style={[
               styles.card, { backgroundColor: colors.backgroundColor }
             ]}>
 
 
-            <View style={styles.tab}>
-              <Text style={[styles.heading, { color: colors.text }]}>
-                Date </Text>
-              <TouchableOpacity onPress={() => showDatePicker()} style={[styles.textInput, { flexDirection: 'row' }]}>
-                <FontAwesome name="calendar" size={20} color="orange" style={{ marginRight: 8 }} />
-                <Text style={{ color: colors.text }}>
-                  {date}
-                </Text>
-              </TouchableOpacity>
-
-            </View>
+            
 
             <View style={styles.tab}>
               <Text style={[styles.heading, { color: colors.text }]}>
                 Name
                                 </Text>
               <TextInput
-                placeholder="Holiday for some purpose"
+                placeholder="Department"
                 style={[styles.textInput, { color: colors.text }]}
                 autoCapitalize="none"
                 onChangeText={(val) => handleNameChange(val)}
               />
             </View>
           
-          <DateTimePickerModal
-            isVisible={isDatePickerVisible}
-            mode="date"
-
-            onConfirm={handleConfirm}
-            onCancel={hideDatePicker}
-          />
+          
           <View style={styles.button}>
             <TouchableOpacity
               style={[styles.signIn, {
@@ -147,20 +125,20 @@ const AddHolScreen = ({ route, navigation }) => {
           </Animatable.View>
 
 
-        </View> : <ActivityIndicator style={styles.loader} size="large" color="orange" />}
+        </View> : <ActivityIndicator style={styles.loader} size="large" color="#c2ba4a" />}
 
       </ScrollView>
-      <BottomNav name="" color='orange' navigation={navigation}></BottomNav>
+      <BottomNav name="" color='#c2ba4a' navigation={navigation}></BottomNav>
     </View>
   )
 }
 
-const AddHolStackScreen = ({ route, navigation }) => {
+const AddDepStackScreen = ({ route, navigation }) => {
 
   return (
     <Stack.Navigator screenOptions={{
       headerStyle: {
-        backgroundColor: 'orange',
+        backgroundColor: '#c2ba4a',
       },
       headerTintColor: '#fff',
       headerTitleStyle: {
@@ -169,18 +147,18 @@ const AddHolStackScreen = ({ route, navigation }) => {
     }}>
       <Stack.Screen
         name="Add Holiday"
-        component={AddHolScreen}
+        component={AddDepScreen}
         options={{
           title: 'Add Holiday ',
           headerLeft: () => (
-            <FontAwesome.Button name="bars" size={25} backgroundColor="orange" onPress={() => navigation.openDrawer()} />
+            <FontAwesome.Button name="bars" size={25} backgroundColor="#c2ba4a" onPress={() => navigation.openDrawer()} />
           )
         }}
       />
     </Stack.Navigator>
   );
 }
-export default AddHolStackScreen;
+export default AddDepStackScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -223,10 +201,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
 
   }, heading: {
-    marginTop: 15,
+    width: "40%",
     color: '#05375a',
-    fontSize: 18,
-    width: "40%"
+    fontSize: 18
   }, card: {
     marginTop: '2%',
     borderRadius: 10,

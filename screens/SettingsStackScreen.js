@@ -6,14 +6,12 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { ActivityIndicator, Avatar, } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
-import BottomNav from './BottomNav.js';
 import { useTheme } from '@react-navigation/native';
 const Stack = createStackNavigator();
+import BottomNav from './BottomNav.js';
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-var monthlist = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-var arr = ['01-', '02-', '03-', '04-', '05-', '06-', '07-', '08-', '09-', '10-', '11-', '12-'];
 
-const AddHolScreen = (props,{route,navigation}) => {
+const SettingsScreen = ({route,navigation}) => {
     const { colors } = useTheme();
     const [loader, setLoader] = React.useState(false)
     const [ref, setRef] = React.useState(false)
@@ -37,7 +35,7 @@ const AddHolScreen = (props,{route,navigation}) => {
 
 
         })
-    }, [navigation,props])
+    }, [navigation])
     return (
       <View style={styles.container}>
       <ScrollView refreshControl={
@@ -55,7 +53,7 @@ const AddHolScreen = (props,{route,navigation}) => {
     )
 }
 
-const AddHolStackScreen = ({ navigation }) => {
+const SettingsStackScreen = ({ navigation }) => {
     return (
       <Stack.Navigator screenOptions={{
         headerStyle: {
@@ -68,7 +66,7 @@ const AddHolStackScreen = ({ navigation }) => {
       }}>
         <Stack.Screen
           name="Holidays"
-          component={AddHolScreen}
+          component={SettingsScreen}
           options={{
             title: ' Holidays ',
             headerLeft: () => (
@@ -79,7 +77,7 @@ const AddHolStackScreen = ({ navigation }) => {
       </Stack.Navigator>
     );
   }
-  export default AddHolStackScreen;
+  export default SettingsStackScreen;
   
   const styles = StyleSheet.create({
     container: {

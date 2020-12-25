@@ -4,16 +4,20 @@ import {
   Text,
   Button,
   StyleSheet,
-  StatusBar,
   ScrollView,
   RefreshControl,
+  Dimensions,
   ActivityIndicator
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import * as Animatable from 'react-native-animatable';
-
+import { createStackNavigator } from '@react-navigation/stack';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import BottomNav from './BottomNav.js';
+const { width, height } = Dimensions.get("screen");
+const Stack = createStackNavigator();
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const [loader, setLoader] = React.useState(false)
@@ -32,6 +36,7 @@ const HomeScreen = ({ navigation }) => {
   React.useEffect(() => {
     var id = '';
     var adm = '';
+    console.log(width,height)
     AsyncStorage.getItem('userToken', (err, result) => {
       id = result;
       AsyncStorage.getItem('admin', (err, result) => {
@@ -57,9 +62,9 @@ const HomeScreen = ({ navigation }) => {
     });
   }, [navigation]);
 
-  const theme = useTheme();
 
   return (
+    <View style={styles.container}>
     <ScrollView refreshControl={
           <RefreshControl
             refreshing={ref}
@@ -68,7 +73,8 @@ const HomeScreen = ({ navigation }) => {
         >
           {loader?
     <View style={styles.container}>
-      <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
+      
+      
       <View style={styles.row}>
         <View
           style={{
@@ -78,7 +84,7 @@ const HomeScreen = ({ navigation }) => {
           }}>
           <View>
             <AnimatedCircularProgress
-              size={180}
+              size={0.9*width/2}
               width={10}
               fill={90}
               padding={20}
@@ -92,7 +98,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <View>
             <AnimatedCircularProgress
-              size={180}
+              size={0.9*width/2}
               width={10}
               fill={99.9}
               padding={20}
@@ -111,7 +117,7 @@ const HomeScreen = ({ navigation }) => {
             justifyContent: 'space-between',
           }}>
           <AnimatedCircularProgress
-            size={180}
+            size={0.9*width/2}
             width={10}
             fill={90}
             padding={20}
@@ -123,7 +129,7 @@ const HomeScreen = ({ navigation }) => {
               </View>}
           </AnimatedCircularProgress>
           <AnimatedCircularProgress
-            size={180}
+            size={0.9*width/2}
             width={10}
             fill={90}
             padding={20}
@@ -154,16 +160,46 @@ const HomeScreen = ({ navigation }) => {
           },
         ]}></Animatable.View>
     </View>:<ActivityIndicator style={styles.loader}size="large" color="purple"/>}
+
     </ScrollView>
+    <BottomNav name="Home" color='red' navigation={navigation}></BottomNav>
+    </View>
+    
   );
 };
-class HomScreen extends React.Component {}
-export default HomeScreen;
+const HomeStackScreen = ({ navigation }) => {
+  return (
+    <Stack.Navigator screenOptions={{
+      headerStyle: {
+        backgroundColor: 'red',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold'
+      },
+      footer:{
+
+      }
+    }}>
+      <Stack.Screen
+        name="Dashboard"
+        component={HomeScreen}
+        options={{
+          title: 'Dashboard',
+          headerLeft: () => (
+            <FontAwesome.Button name="bars" size={25} backgroundColor="red" onPress={() => navigation.openDrawer()} />
+          ),
+          footer:{BottomNav}
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+export default HomeStackScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: '3%',
   },
   row: {
     flexDirection: 'column',

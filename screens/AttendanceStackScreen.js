@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Avatar, } from 'react-native-paper';
-import CalendarStrip from 'react-native-slideable-calendar-strip';
+import CalendarStrip from './CalendarStrip';
 import { createStackNavigator } from '@react-navigation/stack';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-community/async-storage';
 import ToggleSwitch from 'toggle-switch-react-native'
 import { useTheme } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import BottomNav from './BottomNav.js';
+import Ripple from 'react-native-material-ripple';
 const Stack = createStackNavigator();
 var selectedDate = '2018-01-01'
 var dx = 0
@@ -65,7 +67,7 @@ const AttendanceScreen = ({ navigation }) => {
             temp = temparray[(dx - 1) * 2]
             var st = responseJson[i].present[dx - 1]
             if (st == '-') {
-              tpr = false
+              tpr = true
             } else if (st == 'A') {
               tpr = false
             } else {
@@ -127,8 +129,18 @@ const AttendanceScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.touchableOpacityStyle}>
 
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('AttReportStackScreen')}>
+          <FontAwesome name="bar-chart" size={25} backgroundColor="#47c72a" color="white" />
+
+        </TouchableOpacity>
+      </View>
       <ScrollView>
+
+
 
 
         {
@@ -154,26 +166,25 @@ const AttendanceScreen = ({ navigation }) => {
               weekStartsOn={0} // 0,1,2,3,4,5,6 for S M T W T F S, defaults to 0
             />{
               myArray.map((item, key) => {
-                return <View style={{ borderBottomColor: "grey", borderBottomWidth: 0.5 }} key={item.idx} >
+                return <View style={{ borderRadius: 20, margin: '0.5%', backgroundColor: colors.back2 }} key={item.idx} >
                   <View style={[styles.list, {
-                    backgroundColor: colors.background
                   }]}>
 
 
-                    {item.expand ? <View><FontAwesome.Button backgroundColor={colors.background} color="grey" name="caret-up" onPress={() => expand(item.idx)} />
+                    {item.expand ? <View><FontAwesome.Button backgroundColor={colors.back2} color="grey" name="caret-up" onPress={() => expand(item.idx)} />
                     </View> : <View>
-                        <FontAwesome.Button backgroundColor={colors.background} color="grey" name="caret-down" onPress={() => expand(item.idx)} /></View>}
+                        <FontAwesome.Button backgroundColor={colors.back2} color="grey" name="caret-down" onPress={() => expand(item.idx)} /></View>}
 
                     <Avatar.Image size={74} source={{ uri: item.photo }} />
                     <Text style={[{ flexDirection: "column", fontSize: 18, width: "50%", color: colors.text }]} numberOfLines={2}>{item.name} </Text>
 
-                    <ToggleSwitch isOn={item.status} onToggle={isOn => mark(item.idx)} />
+                    <ToggleSwitch offColor={'#f05661'} isOn={item.status} onToggle={isOn => mark(item.idx)} />
 
 
 
                   </View>
                   {item.expand ?
-                    <View style={{ flexDirection: 'column', alignItems: 'center', color: colors.text, backgroundColor: colors.background, }}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', color: colors.text, backgroundColor: colors.back2, }}>
                       <Text style={[{ color: colors.text }]}>Attendance By : Admin</Text>
                       <Text style={[{ color: colors.text }]}>Extra Time Bonus : Rs. 0</Text>
                     </View> : null}
@@ -187,28 +198,28 @@ const AttendanceScreen = ({ navigation }) => {
                 style={[styles.signIn, {
                   marginTop: 15
                 }]}
-                onPress={() => { console.log("SAVED");setSaving(true) }}
+                onPress={() => { console.log("SAVED"); setSaving(true) }}
               >
                 <LinearGradient
-                            colors={['#fbb034', '#ffdd00']}
-                            style={styles.signIn}
-                            start={[-1, 0]}
-                            end={[1, 0]}
-                        >
+                  colors={['#d42424', '#96358d']}
+                  style={styles.signIn}
+                  start={[-1, 0]}
+                  end={[1, 0]}
+                >
 
-                <Text style={[styles.textSign, {
-                  color:'#fffff0'
-                }]}>
-                  SAVE </Text>
-                  {saving?<ActivityIndicator style={{marginLeft:"5%"}} size="small" color="#fffff0" />:null}
-                  </LinearGradient>
+                  <Text style={[styles.textSign, {
+                    color: '#fffff0'
+                  }]}>
+                    SAVE </Text>
+                  {saving ? <ActivityIndicator style={{ marginLeft: "5%" }} size="small" color="#fffff0" /> : null}
+                </LinearGradient>
               </TouchableOpacity>
             </View>
 
           </View> : <ActivityIndicator style={styles.loader} size="large" color="#47c72a" />
         }</ScrollView>
 
-
+      <BottomNav name="Attendance" color="#47c72a" navigation={navigation}></BottomNav>
 
 
 
@@ -252,6 +263,29 @@ const styles = StyleSheet.create({
     marginLeft: "3%",
     marginRight: "3%",
     marginTop: "2%"
+  }, touchableOpacityStyle: {
+    resizeMode: 'contain',
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.29,
+    shadowRadius: 4.65,
+    zIndex: 100,
+
+    elevation: 7,
+    backgroundColor: '#47c72a',
+
+    right: 30,
+    bottom: 72,
+    position: 'absolute'
+
   }, loader: {
     flex: 1,
     justifyContent: "center",
@@ -261,7 +295,7 @@ const styles = StyleSheet.create({
     marginTop: "50%",
   }, button: {
     alignItems: 'center',
-        marginTop: 5
+    marginTop: 5
   }, signIn: {
     width: '60%',
     height: 50,

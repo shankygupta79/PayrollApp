@@ -17,22 +17,33 @@ import {
 
 import { DrawerContent } from './screens/DrawerContent';
 
-import MainTabScreen from './screens/MainTabScreen';
-import SupportScreen from './screens/SupportScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import BookmarkScreen from './screens/BookmarkScreen';
+import SettingsStackScreen from './screens/SettingsStackScreen';
+import ChangePassStackScreen from './screens/ChangePassStackScreen';
 import AttendanceStackScreen from './screens/AttendanceStackScreen';
 import EmployeeStackScreen from './screens/EmployeeStackScreen';
 import EditEmpStackScreen from './screens/EditEmpStackScreen';
 import AddEmpStackScreen from './screens/AddEmpStackScreen';
 import AddHolStackScreen from './screens/AddHolStackScreen';
+import AddLoanStackScreen from './screens/AddLoanStackScreen';
+import AddAdvStackScreen from './screens/AddAdvStackScreen';
+import EditHolStackScreen from './screens/EditHolStackScreen';
+import AddDepStackScreen from './screens/AddDepStackScreen';
 import AddUserStackScreen from './screens/AddUserStackScreen';
+import EditUserStackScreen from './screens/EditUserStackScreen';
 import HolidayStackScreen from './screens/HolidayStackScreen';
+import PayslipsStackScreen from './screens/PayslipsStackScreen';
+import AttReportStackScreen from './screens/AttReportStackScreen';
+import LoanStackScreen from './screens/LoanStackScreen';
+import AdvStackScreen from './screens/AdvStackScreen';
+import CalcStackScreen from './screens/CalcStackScreen';
+import DepStackScreen from './screens/DepStackScreen';
 import UsersStackScreen from './screens/UsersStackScreen';
 import { AuthContext } from './components/context';
 import RootStackScreen from './screens/RootStackScreen';
 import AsyncStorage from '@react-native-community/async-storage';
-
+import BottomNav from './screens/BottomNav.js'
+import HomeStackScreen from './screens/HomeStackScreen';
+import LedgerStackScreen from './screens/LedgerStackScreen';
 const Drawer = createDrawerNavigator();
 const mylink={
   prefixes:['https://payroll.com','payroll://'],
@@ -56,7 +67,8 @@ const App = () => {
       ...NavigationDefaultTheme.colors,
       ...PaperDefaultTheme.colors,
       background: '#ffffff',
-      text: '#333333'
+      text: '#333333',
+      back2:"#edeef0",
     }
   }
   
@@ -67,7 +79,8 @@ const App = () => {
       ...NavigationDarkTheme.colors,
       ...PaperDarkTheme.colors,
       background: '#333333',
-      text: '#ffffff'
+      text: '#ffffff',
+      back2:'#4d4c4c'
     }
   }
 
@@ -178,18 +191,30 @@ const App = () => {
     <NavigationContainer theme={theme} linking={mylink}>
       { loginState.userToken !== null ? (
         <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />}>
-          <Drawer.Screen name="HomeDrawer" component={MainTabScreen} />
-          <Drawer.Screen name="SupportScreen" component={SupportScreen} />
-          <Drawer.Screen name="SettingsScreen" component={SettingsScreen} />
-          <Drawer.Screen name="BookmarkScreen" component={BookmarkScreen} />
+          <Drawer.Screen name="HomeStackScreen" component={HomeStackScreen} />
+          <Drawer.Screen name="ChangePassStackScreen" component={ChangePassStackScreen} />
+          <Drawer.Screen name="SettingsStackScreen" component={SettingsStackScreen} />
           <Drawer.Screen name="EmployeeStackScreen" component={EmployeeStackScreen} />
           <Drawer.Screen name="AttendanceStackScreen" component={AttendanceStackScreen} />
           <Drawer.Screen name="EditEmpStackScreen" component={EditEmpStackScreen} />
+          <Drawer.Screen name="LoanStackScreen" component={LoanStackScreen} />
+          <Drawer.Screen name="AdvStackScreen" component={AdvStackScreen} />
           <Drawer.Screen name="AddEmpStackScreen" component={AddEmpStackScreen} />
-          <Drawer.Screen name="AddHolidayStackScreen" component={AddHolStackScreen} />
+          <Drawer.Screen name="AddHolStackScreen" component={AddHolStackScreen} />
+          <Drawer.Screen name="AddAdvStackScreen" component={AddAdvStackScreen} />
+          <Drawer.Screen name="AddLoanStackScreen" component={AddLoanStackScreen} />
+          <Drawer.Screen name="EditHolStackScreen" component={EditHolStackScreen} />
           <Drawer.Screen name="AddUserStackScreen" component={AddUserStackScreen} />
+          <Drawer.Screen name="CalcStackScreen" component={CalcStackScreen} />
+          <Drawer.Screen name="PayslipsStackScreen" component={PayslipsStackScreen} />
+          <Drawer.Screen name="AttReportStackScreen" component={AttReportStackScreen} />
+          <Drawer.Screen name="EditUserStackScreen" component={EditUserStackScreen} />
           <Drawer.Screen name="HolidayStackScreen" component={HolidayStackScreen} />
+          <Drawer.Screen name="AddDepStackScreen" component={AddDepStackScreen} />
+          <Drawer.Screen name="DepStackScreen" component={DepStackScreen} />
           <Drawer.Screen name="UsersStackScreen" component={UsersStackScreen} />
+          <Drawer.Screen name="LedgerStackScreen" component={LedgerStackScreen} />
+          <Drawer.Screen name="BottomNav" component={BottomNav} />
         </Drawer.Navigator>
       )
     :
