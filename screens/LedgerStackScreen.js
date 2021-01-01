@@ -62,40 +62,44 @@ const LedgerScreen = ({ navigation }) => {
 
   }
   const year = () => {
-    var d = new Date();
-    var n = d.getFullYear() + 1;
-    var y = 2020;
-    do {
-      yearlist.push(y + "")
-      y++;
-    } while (n != y);
-    setSelect2(monthlist[d.getMonth()]);
-    setSelect3("" + n - 1)
+    if (yearlist.length == 0) {
+      var d = new Date();
+      var n = d.getFullYear() + 1;
+      var y = 2020;
+      do {
+        yearlist.push(y + "")
+        y++;
+      } while (n != y);
+      setSelect2(monthlist[d.getMonth()]);
+      setSelect3("" + n - 1)
+
+    }
+
   }
   const api1 = async (api) => {
     setLoader(false)
     return fetch(api)
-            .then((response) => response.json())
-            .then((responseJson) => {
-      myArray = [];
-      idx = []
-      totalloan = []
-      for (var i = 0; i < responseJson.length; i++) {
-        myArray.push(responseJson[i].name);
-        totalloan.push({ name: responseJson[i].name, loan: responseJson[i].totalloan })
-        idx.push(responseJson[i].emp_id);
-      }
-      setRef(false)
-      setLoader(true)
-    }). catch (error=> {
-      console.error(error);
-      Alert.alert('Error Occured!', 'Some Error Occured.' + e, [
-        { text: 'Okay' }
-      ]);
-      setRef(false)
-      setLoader(true)
-      return
-    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        myArray = [];
+        idx = []
+        totalloan = []
+        for (var i = 0; i < responseJson.length; i++) {
+          myArray.push(responseJson[i].name);
+          totalloan.push({ name: responseJson[i].name, loan: responseJson[i].totalloan })
+          idx.push(responseJson[i].emp_id);
+        }
+        setRef(false)
+        setLoader(true)
+      }).catch(error => {
+        console.error(error);
+        Alert.alert('Error Occured!', 'Some Error Occured.' + e, [
+          { text: 'Okay' }
+        ]);
+        setRef(false)
+        setLoader(true)
+        return
+      })
 
   };
   const view = async () => {
@@ -117,7 +121,8 @@ const LedgerScreen = ({ navigation }) => {
     fetch(ap1)
       .then((response) => response.json())
       .then((responseJson) => {
-        if(responseJson==false){
+        console.log(responseJson)
+        if (responseJson.length==undefined &&  responseJson == false) {
           Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
             { text: 'Okay' }
           ]);
@@ -125,7 +130,7 @@ const LedgerScreen = ({ navigation }) => {
           setSaving(false)
           setLoader(true)
           return
-      }
+        }
         loan = responseJson
         for (var i = 0; i < loan.length; i++) {
           if (loan[i].type == 0) {
@@ -145,7 +150,7 @@ const LedgerScreen = ({ navigation }) => {
     fetch(ap2)
       .then((response) => response.json())
       .then((responseJson) => {
-        if(responseJson==false){
+        if (responseJson.length==undefined && responseJson == false) {
           Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
             { text: 'Okay' }
           ]);
@@ -153,7 +158,7 @@ const LedgerScreen = ({ navigation }) => {
           setSaving(false)
           setLoader(true)
           return
-      }
+        }
         adv = responseJson
         for (var i = 0; i < adv.length; i++) {
           if (adv[i].type == 0) {
@@ -172,12 +177,11 @@ const LedgerScreen = ({ navigation }) => {
       })
 
     var ap3 = 'https://payrollv2.herokuapp.com/payslips/api/data?date=' + arr[monthlist.indexOf(select2)] + select3 + "&emp=" + idx[myArray.indexOf(select1)] + z;
-    console.log(ap3)
     setXX(false)
     fetch(ap3)
       .then((response) => response.json())
       .then((responseJson) => {
-        if(responseJson==false){
+        if (responseJson == false) {
           Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
             { text: 'Okay' }
           ]);
@@ -185,12 +189,11 @@ const LedgerScreen = ({ navigation }) => {
           setSaving(false)
           setLoader(true)
           return
-      }
+        }
         list = responseJson
-        var x=[list]
-        console.log(x)
+        var x = [list]
         console.log("Heya")
-        if (x.length==0) {
+        if (x.length == 0) {
           Alert.alert('No Record!', 'No Record Found.', [
             { text: 'Okay' }
           ]);
@@ -220,8 +223,7 @@ const LedgerScreen = ({ navigation }) => {
         Alert.alert('No Record!', 'No Record Found.', [
           { text: 'Okay' }
         ]);
-        console.log(list)
-        list={}
+        list = {}
         setData(true)
         setXX(false)
         setSaving(false)
@@ -337,7 +339,7 @@ const LedgerScreen = ({ navigation }) => {
           <View style={styles.button}>
 
             <TouchableOpacity
-              onPress={() => { console.log("CLICKED");  view() }} >
+              onPress={() => { console.log("CLICKED"); view() }} >
               <LinearGradient
                 colors={['#fc03d3', '#fc03d3', '#215cdb']}
                 style={styles.signIn}
@@ -397,103 +399,103 @@ const LedgerScreen = ({ navigation }) => {
           </View>
 
           {data ? <View>
-            {xx?<View>
-            <View style={[styles.blck, { backgroundColor: '#4d47f5' }]}>
-              <View style={[styles.table, { justifyContent: 'center' }]}>
-                <Text style={[{ color: 'white', fontSize: 15 }]}>
-                  {list.employee_quick.name}
-                </Text>
+            {xx ? <View>
+              <View style={[styles.blck, { backgroundColor: '#4d47f5' }]}>
+                <View style={[styles.table, { justifyContent: 'center' }]}>
+                  <Text style={[{ color: 'white', fontSize: 15 }]}>
+                    {list.employee_quick.name}
+                  </Text>
+                </View>
+              </View>
+              <View style={[styles.blck, { backgroundColor: colors.back2 }]}>
+                <View style={[styles.table]}>
+                  <Text>
+
+                  </Text>
+                  <Avatar.Image size={74} source={{ uri: list.employee_quick.photo }} />
+
+
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Net Pay
+              </Text>
+                  <Text style={[styles.text2, { color: colors.text, fontSize: 17 }]}>
+                    ₹ {parseInt(list['employee_quick'].salary) + parseInt(list.bonus) + parseInt(list.extratimetotoal) - parseInt(list.deduction) - parseInt(list.advance) - parseInt(list.holidays) - parseInt(list.emi) - parseInt(list.transfer)}
+                  </Text>
+
+                </View>
+                <View style={[styles.table]}>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Salary
+              </Text>
+                  <Text style={[styles.text2, { color: 'green', }]}>
+                    ₹ {parseInt(list['employee_quick'].salary)}
+                  </Text>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Holidays
+              </Text>
+                  <Text style={[styles.text2, { color: 'red', }]}>
+                    ₹ {parseInt(list.holidays)}
+                  </Text>
+                </View>
+                <View style={[styles.table]}>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Extra Time
+              </Text>
+                  <Text style={[styles.text2, { color: 'red', }]}>
+                    ₹ {parseInt(list.extratimetotoal)}
+                  </Text>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Advance
+              </Text>
+                  <Text style={[styles.text2, { color: 'red', }]}>
+                    ₹ {parseInt(list.advance)}
+                  </Text>
+                </View>
+                <View style={[styles.table]}>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Total Loan
+              </Text>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    ₹ {parseInt(list['employee_quick'].totalloan) - parseInt(list.emi) + parseInt(list.emiold)}
+                  </Text>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    EMI
+              </Text>
+                  <Text style={[styles.text2, { color: 'red', }]}>
+                    ₹ {parseInt(list.emi)}
+                  </Text>
+                </View>
+                <View style={[styles.table]}>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Bonus
+              </Text>
+                  <Text style={[styles.text2, { color: 'green', }]}>
+                    ₹ {parseInt(list.bonus)}
+                  </Text>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Deduction
+              </Text>
+                  <Text style={[styles.text2, { color: 'red', }]}>
+                    ₹ {parseInt(list.deduction)}
+                  </Text>
+                </View>
+                <View style={[styles.table]}>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Balance
+              </Text>
+                  <Text style={[styles.text2, { color: colors.text, fontSize: 17 }]}>
+                    ₹ {parseInt(list['employee_quick'].salary) + parseInt(list.bonus) + parseInt(list.extratimetotoal) - parseInt(list.deduction) - parseInt(list.advance) - parseInt(list.holidays) - parseInt(list.emi)}
+                  </Text>
+                  <Text style={[styles.text2, { color: colors.text, }]}>
+                    Transfer
+              </Text>
+                  <Text style={[styles.text2, { color: 'red', }]}>
+                    ₹ {parseInt(list.transfer)}
+                  </Text>
+                </View>
               </View>
             </View>
-            <View style={[styles.blck, { backgroundColor: colors.back2 }]}>
-              <View style={[styles.table]}>
-                <Text>
-
-                </Text>
-                <Avatar.Image size={74} source={{ uri: list.employee_quick.photo }} />
-
-
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Net Pay
-              </Text>
-                <Text style={[styles.text2, { color: colors.text, fontSize: 17 }]}>
-                  ₹ {parseInt(list['employee_quick'].salary) + parseInt(list.bonus) + parseInt(list.extratimetotoal) - parseInt(list.deduction) - parseInt(list.advance) - parseInt(list.holidays) - parseInt(list.emi) - parseInt(list.transfer)}
-                </Text>
-
-              </View>
-              <View style={[styles.table]}>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Salary
-              </Text>
-                <Text style={[styles.text2, { color: 'green', }]}>
-                  ₹ {parseInt(list['employee_quick'].salary)}
-                </Text>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Holidays
-              </Text>
-                <Text style={[styles.text2, { color: 'red', }]}>
-                  ₹ {parseInt(list.holidays)}
-                </Text>
-              </View>
-              <View style={[styles.table]}>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Extra Time
-              </Text>
-                <Text style={[styles.text2, { color: 'red', }]}>
-                  ₹ {parseInt(list.extratimetotoal)}
-                </Text>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Advance
-              </Text>
-                <Text style={[styles.text2, { color: 'red', }]}>
-                  ₹ {parseInt(list.advance)}
-                </Text>
-              </View>
-              <View style={[styles.table]}>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Total Loan
-              </Text>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  ₹ {parseInt(list['employee_quick'].totalloan) - parseInt(list.emi) + parseInt(list.emiold)}
-                </Text>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  EMI
-              </Text>
-                <Text style={[styles.text2, { color: 'red', }]}>
-                  ₹ {parseInt(list.emi)}
-                </Text>
-              </View>
-              <View style={[styles.table]}>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Bonus
-              </Text>
-                <Text style={[styles.text2, { color: 'green', }]}>
-                  ₹ {parseInt(list.bonus)}
-                </Text>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Deduction
-              </Text>
-                <Text style={[styles.text2, { color: 'red', }]}>
-                  ₹ {parseInt(list.deduction)}
-                </Text>
-              </View>
-              <View style={[styles.table]}>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Balance
-              </Text>
-                <Text style={[styles.text2, { color: colors.text, fontSize: 17 }]}>
-                  ₹ {parseInt(list['employee_quick'].salary) + parseInt(list.bonus) + parseInt(list.extratimetotoal) - parseInt(list.deduction) - parseInt(list.advance) - parseInt(list.holidays) - parseInt(list.emi)}
-                </Text>
-                <Text style={[styles.text2, { color: colors.text, }]}>
-                  Transfer
-              </Text>
-                <Text style={[styles.text2, { color: 'red', }]}>
-                  ₹ {parseInt(list.transfer)}
-                </Text>
-              </View>
-            </View>
-            </View>
-          :null}
+              : null}
 
 
             <View>

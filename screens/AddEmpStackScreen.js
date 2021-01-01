@@ -146,6 +146,7 @@ const AddEmpScreen = ({ navigation }) => {
                     { text: 'Okay' }
                 ]);
                 setLoader(true)
+                setRef(false)
                 return
             })
 

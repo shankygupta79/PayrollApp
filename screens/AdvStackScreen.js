@@ -52,6 +52,7 @@ const AdvScreen = ({ navigation }) => {
 
   }
   const year = () => {
+    if (yearlist.length == 0) {
     var d = new Date();
     var n = d.getFullYear() + 1;
     var y = 2020;
@@ -61,6 +62,7 @@ const AdvScreen = ({ navigation }) => {
     } while (n != y);
     setSelect2(monthlist[d.getMonth()]);
     setSelect3("" + n - 1)
+  }
   }
   const api1 = async (api) => {
     try {

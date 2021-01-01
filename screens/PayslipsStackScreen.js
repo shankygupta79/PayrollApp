@@ -57,7 +57,7 @@ const Payslipscreen = ({ route, navigation }) => {
         return fetch(ap1)
             .then((response) => response.json())
             .then((responseJson) => {
-                if(responseJson==false){
+                if(responseJson.length==undefined && responseJson==false){
                     Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
                       { text: 'Okay' }
                     ]);

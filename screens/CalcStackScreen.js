@@ -85,8 +85,10 @@ const CalcScreen = ({ navigation }) => {
           })
         }).then((response) => response.json())
           .then((data) => {
+            console.log("AJA")
             console.log(data)
             setSaving2(false)
+            
             if(data==false){
               Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
                 { text: 'Okay' }
@@ -126,6 +128,7 @@ const CalcScreen = ({ navigation }) => {
     }
   }
   const year = () => {
+    if (yearlist.length == 0) {
     var d = new Date();
     var n = d.getFullYear() + 1;
     var y = 2020;
@@ -135,6 +138,7 @@ const CalcScreen = ({ navigation }) => {
     } while (n != y);
     setSelect2(monthlist[d.getMonth()]);
     setSelect3("" + n - 1)
+  }
   }
 
   const view = async () => {
@@ -151,6 +155,15 @@ const CalcScreen = ({ navigation }) => {
     return fetch(ap1)
       .then((response) => response.json())
       .then((responseJson) => {
+        if(responseJson.length==0){
+          Alert.alert('No Record!', 'No record for the Month !.', [
+            { text: 'Okay' }
+          ])
+          setSaving(false)
+          setRef(false)
+          setLoader(true)
+          return
+        }
         if(responseJson==false){
           Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
             { text: 'Okay' }

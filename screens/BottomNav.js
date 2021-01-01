@@ -39,7 +39,7 @@ const BottomNav = (props) => {
                 <FontAwesome name="users" size={'Employee' === val ? 20 : 25} color={'Employee' === val ? "#ffff" : "#c9c9c7"} />
                 {val == 'Employee' ? <Text style={styles.text}>Employee</Text> : null}
             </Ripple>
-            <Ripple style={[styles.single,{backgroundColor:colorval}]} rippleColor="rgb(255,255,255)" rippleOpacity={0.7} onPress={() =>{ props.navigation.navigate('ChangePassStackScreen'), setVal("Settings");setColorVal('#d083fc')}}>
+            <Ripple style={[styles.single,{backgroundColor:colorval}]} rippleColor="rgb(255,255,255)" rippleOpacity={0.7} onPress={() =>{ props.navigation.navigate('SettingsStackScreen'), setVal("Settings");setColorVal('#d083fc')}}>
                 <FontAwesome name="cogs" size={'Settings' === val ? 20 : 25} color={'Settings' === val ? "#ffff" : "#c9c9c7"} />
                 {val == 'Settings' ? <Text style={styles.text}>Settings</Text> : null}
             </Ripple>

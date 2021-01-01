@@ -49,6 +49,13 @@ const AttendanceScreen = ({ navigation }) => {
     var yeaar = selectedDate.getFullYear();
     dx = parseInt(selectedDate.getDate())
     x = mon + "-" + yeaar;
+    if(off[(selectedDate.getDay()-1+7)%7]=="1"){
+      Alert.alert('Today is Holiday !', 'Enjoy The Day !.', [
+        { text: 'Okay' }
+      ]);
+      setLoader(true)
+      return
+    }
     api = 'https://payrollv2.herokuapp.com/attendance/api/attendance?date=' + x + '&dx=' + dx + '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
 
     //setContent([a, a, a, a])
@@ -58,6 +65,14 @@ const AttendanceScreen = ({ navigation }) => {
       .then((responseJson) => {
         console.log("ATT API")
         //console.log(responseJson)
+        if (responseJson == false) {
+          Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+            { text: 'Okay' }
+          ]);
+          setLoader(true)
+          return
+        }
+        
         if (responseJson == '5') {
           Alert.alert('Chart for this Month Created!', 'Reload to mark Attendance !', [
             { text: 'Okay' }
@@ -171,8 +186,8 @@ const AttendanceScreen = ({ navigation }) => {
               Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
                 { text: 'Okay' }
               ]);
-              setRef(false)
               setLoader(true)
+              reject("Z")
               return
             }
             if (myArray[j].status == "-") {
@@ -204,6 +219,9 @@ const AttendanceScreen = ({ navigation }) => {
     for (var i = 0; i < myArray.length; i++) {
       var a = await attendance(i);
       console.log(a)
+      if(a=="Z"){
+        break
+      }
 
     }
     Alert.alert('Attendance Marked', 'Attendance Marked for '+selectedDate, [

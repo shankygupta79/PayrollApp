@@ -39,7 +39,7 @@ for (var i = 1; i <= days; i++) {
 }
 var sortfield = ""
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-const AttReportScreen = ( { route, navigation }) => {
+const AttReportScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
   const [select1, setSelect1] = React.useState("All Employees")
   const [loader, setLoader] = React.useState(false)
@@ -55,15 +55,15 @@ const AttReportScreen = ( { route, navigation }) => {
     try {
       const response = await fetch(api);
       const responseJson = await response.json();
-      if(responseJson==false){
+      if (responseJson == false) {
         Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
           { text: 'Okay' }
-        ]); 
+        ]);
         setRef(false)
         setSaving(false)
         setLoader(true)
         return
-    }
+      }
       myArray = ["All Employee"];
       idx = [-1]
       for (var i = 0; i < responseJson.length; i++) {
@@ -77,19 +77,21 @@ const AttReportScreen = ( { route, navigation }) => {
 
   };
   const year = () => {
-    var d = new Date();
-    var n = d.getFullYear() + 1;
-    var y = 2020;
-    do {
-      yearlist.push(y + "")
-      y++;
-    } while (n != y);
-    setSelect2(monthlist[d.getMonth()]);
-    setSelect3("" + n - 1)
+    if (yearlist.length == 0) {
+      var d = new Date();
+      var n = d.getFullYear() + 1;
+      var y = 2020;
+      do {
+        yearlist.push(y + "")
+        y++;
+      } while (n != y);
+      setSelect2(monthlist[d.getMonth()]);
+      setSelect3("" + n - 1)
+    }
   }
   const view = async () => {
     if (saving == true) {
-    return
+      return
     }
     setData(false)
     setSaving(true)
@@ -99,15 +101,15 @@ const AttReportScreen = ( { route, navigation }) => {
     try {
       const response = await fetch(ap1);
       list = await response.json();
-      if(list==false){
+      if (list.length == undefined && list == false) {
         Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
           { text: 'Okay' }
-        ]); 
+        ]);
         setRef(false)
         setSaving(false)
         setLoader(true)
         return
-    }
+      }
 
       if (response.length == 0) {
         Alert.alert('No Record!', 'No Record Found.', [
@@ -123,9 +125,9 @@ const AttReportScreen = ( { route, navigation }) => {
       days = monthday[zz]
       days2 = days - 28
       for (var i = 0; i < list.length; i++) {
-        list[i] = { name: list[i]['employee_quick'].name, att: list[i].present.split("").splice(0,days) }
+        list[i] = { name: list[i]['employee_quick'].name, att: list[i].present.split("").splice(0, days) }
       }
-      
+
       daysarr = []
       weekarr = []
       for (var i = 1; i <= days; i++) {
@@ -283,82 +285,82 @@ const AttReportScreen = ( { route, navigation }) => {
               </LinearGradient>
             </TouchableOpacity>
           </View>
-          <View style={{margin:'4%'}}>
-          {
-            data ? <View>
-              <ScrollView horizontal={true} style={{paddingBottom:10}}>
-                <View style={{ flexDirection: 'column',justifyContent:'center',alignItems:'center' }}>
+          <View style={{ margin: '4%' }}>
+            {
+              data ? <View>
+                <ScrollView horizontal={true} style={{ paddingBottom: 10 }}>
+                  <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 
-                  <View style={{ flexDirection: 'row', }}>
-                    <View style={[styles.header, { width: width * 0.3,backgroundColor:'#47c72a' }]}>
-                      <Text style={[styles.text, { color: 'white',fontWeight:'bold',padding:10  }]}>
-                        Name
+                    <View style={{ flexDirection: 'row', }}>
+                      <View style={[styles.header, { width: width * 0.3, backgroundColor: '#47c72a' }]}>
+                        <Text style={[styles.text, { color: 'white', fontWeight: 'bold', padding: 10 }]}>
+                          Name
                     </Text>
-                    </View>
-                    {
-                      daysarr.map((item, key) => {
-                        return (
+                      </View>
+                      {
+                        daysarr.map((item, key) => {
+                          return (
 
-                          <View style={[styles.header,{backgroundColor:'#47c72a'}]}>
+                            <View style={[styles.header, { backgroundColor: '#47c72a' }]}>
 
-                            <Text style={[styles.text, { color: 'white',fontWeight:'bold' }]}>
-                              {item}
-                            </Text>
-                            <Text style={[styles.text, { color: 'white',fontWeight:'bold' }]}>
-                              {weekarr[key]}
-                            </Text>
-
-                          </View>
-
-                        )
-                      })
-                    }
-                  </View>
-                  <View style={{ flexDirection: 'column' }}>
-
-                    {
-                      list.map((item, key) => {
-                        return (
-                          <View style={{ flexDirection: 'row', height: 75 }}>
-                            <View style={[styles.header, { width: width * 0.3,alignItems:'flex-start'}]}>
-
-                              <Text style={[styles.text, { color: colors.text,padding:10 }]}>
-                                {item.name}
+                              <Text style={[styles.text, { color: 'white', fontWeight: 'bold' }]}>
+                                {item}
                               </Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', flex: 1, }}>
-                              {
-                                item.att.map((item2, key2) => {
-                                  return (
+                              <Text style={[styles.text, { color: 'white', fontWeight: 'bold' }]}>
+                                {weekarr[key]}
+                              </Text>
 
-                                    <View style={styles.header}>
-
-                                      <Text style={[styles.text, { color:  item2=='A'?'red' :colors.text }]}>
-                                        {item2}
-                                      </Text>
-
-                                    </View>
-
-                                  )
-                                })
-                              }
                             </View>
 
-                          </View>
+                          )
+                        })
+                      }
+                    </View>
+                    <View style={{ flexDirection: 'column' }}>
 
-                        )
-                      })
-                    }
+                      {
+                        list.map((item, key) => {
+                          return (
+                            <View style={{ flexDirection: 'row', height: 75 }}>
+                              <View style={[styles.header, { width: width * 0.3, alignItems: 'flex-start' }]}>
 
+                                <Text style={[styles.text, { color: colors.text, padding: 10 }]}>
+                                  {item.name}
+                                </Text>
+                              </View>
+                              <View style={{ flexDirection: 'row', flex: 1, }}>
+                                {
+                                  item.att.map((item2, key2) => {
+                                    return (
+
+                                      <View style={styles.header}>
+
+                                        <Text style={[styles.text, { color: item2 == 'A' ? 'red' : colors.text }]}>
+                                          {item2}
+                                        </Text>
+
+                                      </View>
+
+                                    )
+                                  })
+                                }
+                              </View>
+
+                            </View>
+
+                          )
+                        })
+                      }
+
+                    </View>
                   </View>
-                </View>
 
 
-              </ScrollView>
+                </ScrollView>
 
-            </View>
-              : null
-          }
+              </View>
+                : null
+            }
           </View>
           <View>
             <Text style={{ height: height * 0.1 }}>
@@ -410,7 +412,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
-    marginTop: "0%",
+    marginTop: "50%",
   }, blck: {
     padding: "2%",
     margin: '0.5%',
@@ -440,8 +442,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 0.5,
     borderRadius: 0,
-    borderBottomWidth:0.8,
-    borderColor:'#bfbeba',
+    borderBottomWidth: 0.8,
+    borderColor: '#bfbeba',
     justifyContent: 'center',
   }
 })

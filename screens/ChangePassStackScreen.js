@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { useTheme } from '@react-navigation/native';
 import BottomNav from './BottomNav.js';
 const Stack = createStackNavigator();
+var z=""
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 const { width, height } = Dimensions.get("screen");
 const ChangePassScreen = ({ route, navigation }) => {
@@ -17,6 +18,7 @@ const ChangePassScreen = ({ route, navigation }) => {
   const [loader, setLoader] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [pass1, setPass1] = React.useState("")
+  const [change, setChange] = React.useState(0)
   const [pass2, setPass2] = React.useState("")
   const [pass3, setPass3] = React.useState("")
   const [ref, setRef] = React.useState(false)
@@ -26,9 +28,6 @@ const ChangePassScreen = ({ route, navigation }) => {
 
   }
   const save = () => {
-    console.log(pass1)
-    console.log(pass2)
-    console.log(pass3)
     if (pass1=="" || pass2=="" || pass3 == "") {
       Alert.alert('Enter Password!', 'Password Field Cannot Be Empty.', [
         { text: 'Okay' }
@@ -47,10 +46,58 @@ const ChangePassScreen = ({ route, navigation }) => {
       return
 
     }
-    setSaving(true)
-    setTimeout(()=>{
+    try {
+      setSaving(true)
+      fetch('http://payrollv2.herokuapp.com/settings/changepass' + z, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          password: pass1.trim(),
+          newpass: pass3.trim(),
+        })
+      }).then((response) => response.json())
+        .then((data) => {
+          setSaving(false)
+          console.log(data)
+          if(data==false){
+            Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+              { text: 'Okay' }
+            ]);
+            setRef(false)
+            setLoader(true)
+            return 
+          }
+          if (data.message == 'true') {
+            
+            setPass1("")
+            setPass2("")
+            setPass3("")
+            setChange(change+1)
+            Alert.alert('Success', 'Password Changed Successfully.', [
+              { text: 'Okay' }
+            ]);
+            return
+          } else {
+            Alert.alert('Some Error!', data.message, [
+              { text: 'Okay' }
+            ]);
+
+            return
+          }
+
+        })
+
+    } catch {
+      Alert.alert('Some Error!', 'Try Again Some Error.', [
+        { text: 'Okay' }
+      ]);
       setSaving(false)
-    },1000)
+      return
+
+    }
     
   };
   React.useEffect(() => {
@@ -61,13 +108,14 @@ const ChangePassScreen = ({ route, navigation }) => {
       var id = stores[2][1];
       var access = stores[3][1];
       var id2 = stores[4][1];
+      z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       setLoader(true)
       //console.log(api2)
       //await api1(api, api2).then(() => { setLoader(true) })
 
 
     })
-  }, [navigation])
+  }, [navigation,change])
   return (
     <View style={styles.container}>
       <ScrollView refreshControl={
