@@ -13,13 +13,12 @@ import BottomNav from './BottomNav.js';
 import { set } from 'react-native-reanimated';
 const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-var date = "01-01-2000"
+var z=""
 const { width, height } = Dimensions.get("screen");
 const AddDepScreen = ({  navigation }) => {
   const { colors } = useTheme();
-  console.log(navigation)
-  console.log("Hey")
   const [loader, setLoader] = React.useState(false)
+  const [change, setChange] = React.useState(0);
   const [saving, setSaving] = React.useState(false)
   const [ref, setRef] = React.useState(false)
   const handleNameChange = (val) => { setData({ ...data, name: val }); }
@@ -47,12 +46,56 @@ const AddDepScreen = ({  navigation }) => {
       setSaving(false)
       return
 
+    }else{
+      try {
+        setSaving(true)
+        fetch('http://payrollv2.herokuapp.com/department/add_deppost' + z, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: data.name,
+          })
+        }).then((response) => response.json())
+          .then((data) => {
+            setSaving(false)
+            if(data==false){
+              Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                { text: 'Okay' }
+              ]);
+              setRef(false)
+              setLoader(true)
+              return 
+            }
+            if (data.message == 'true') {
+              setData({...data,name:''})
+              setChange(change+1)
+              Alert.alert('Success', 'Department Added Successfully.', [
+                { text: 'Okay', onPress: () => { navigation.navigate('DepStackScreen', { refresh: true }) } }
+              ]);
+              return
+            } else {
+              Alert.alert('Some Error!', 'Try Again Some Error.', [
+                { text: 'Okay' }
+              ]);
+
+              return
+            }
+
+          })
+
+      } catch {
+        Alert.alert('Some Error!', 'Try Again Some Error.', [
+          { text: 'Okay' }
+        ]);
+        setSaving(false)
+        return
+
+      }
     }
     
-    setTimeout(()=>{
-      console.log(data.name)
-      setSaving(false)
-    },5000)
   };
   
   React.useEffect(() => {
@@ -64,12 +107,14 @@ const AddDepScreen = ({  navigation }) => {
       var access = stores[3][1];
       var id2 = stores[4][1];
       setLoader(true)
+      z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       //console.log(api2)
       //await api1(api).then(() => { setLoader(true) })
 
 
     })
-  }, [navigation])
+  }, [navigation,change])
+
   return (
     <View style={styles.container}>
       <ScrollView refreshControl={
@@ -146,10 +191,10 @@ const AddDepStackScreen = ({ route, navigation }) => {
       }
     }}>
       <Stack.Screen
-        name="Add Holiday"
+        name="Add Department"
         component={AddDepScreen}
         options={{
-          title: 'Add Holiday ',
+          title: 'Add Department ',
           headerLeft: () => (
             <FontAwesome.Button name="bars" size={25} backgroundColor="#c2ba4a" onPress={() => navigation.openDrawer()} />
           )

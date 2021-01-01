@@ -14,12 +14,16 @@ import BottomNav from './BottomNav.js';
 const Stack = createStackNavigator();
 var myArray = []
 var api = ""
+var z=""
 var sortfield = "Date"
 var map = ['Date', 'Name']
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-const HolidayScreen = ({ route, navigation }) => {
+const HolidayScreen = (props, { route, navigation }) => {
+    navigation = props.navigation
     const { colors } = useTheme();
+    const [change, setChange] = React.useState(false)
     const [loader, setLoader] = React.useState(false)
+    const [deleting, setDeleting] = React.useState(false)
     const [select1, setSelect1] = React.useState("None")
     const [visible1, setVisible1] = React.useState(false)
     const [ref, setRef] = React.useState(false)
@@ -29,9 +33,9 @@ const HolidayScreen = ({ route, navigation }) => {
         }
         setRef(true);
         api1(api)
-        setTimeout(function () { setRef(false) }, 1500);
 
     }
+
     const sort = (key) => {
         console.log(key)
         sortfield = key
@@ -63,22 +67,85 @@ const HolidayScreen = ({ route, navigation }) => {
         }
         return 0;
     }
-    const api1 = async (api) => {
-        try {
-            const response = await fetch(api);
-            const responseJson = await response.json();
-            myArray = responseJson
-            sort('Date')
-        } catch (error) {
-            console.error(error);
-            return await Promise.reject(false);
-        }
+    const api1 = (api) => {
+        setLoader(false)
+        console.log("called")
+        fetch(api)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                if(responseJson==false){
+                    Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                      { text: 'Okay' }
+                    ]);
+                    setRef(false)
+                    setLoader(true)
+                    return 
+                  }
+                myArray = responseJson
+                sort('Date')
+                setChange(change + 1)
+                setRef(false)
+                setLoader(true)
+            }).catch((error) => {
+                console.error(error);
+                Alert.alert('Error Occured!', 'Some Error Occured.' + error, [
+                    { text: 'Okay' }
+                ]);
+                setLoader(true)
+                return
+            })
 
     }
-    const deletefun = () => {
+    const deleteit = (obj) => {
+        if (deleting == true) {
+            return
+        }
+
+        console.log("Deleting" )
+        setDeleting(true)
+        try {
+            fetch('http://payrollv2.herokuapp.com/holiday/delete?idx='+ obj.hol_id+ z, {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                idx: obj.hol_id,
+              })
+            }).then((response) => response.json())
+              .then((data) => {
+                setDeleting(false)
+                if (data.message == 'true') {
+                  setChange(change+1)
+                  Alert.alert('Success', 'Holiday Deleted Successfully.', [
+                    { text: 'Okay', onPress: () => { onRefresh() } }
+                  ]);
+                  return
+                } else {
+                  Alert.alert('Some Error!', 'Try Again Some Error.', [
+                    { text: 'Okay' }
+                  ]);
+                  setDeleting(false)
+                  return
+                }
+    
+              })
+    
+          } catch {
+            Alert.alert('Some Error!', 'Try Again Some Error.', [
+              { text: 'Okay' }
+            ]);
+            setDeleting(false)
+            return
+    
+          }
+
+    }
+    const deletefun = (obj) => {
         Alert.alert('Delete Holiday !', 'Are you sure to selete the Holiday ?', [
             { text: 'Cancel' },
-            { text: 'Okay', onPress: () => console.log("OK Pressed") }
+            { text: 'Okay', onPress: () => {deleteit(obj)} }
 
         ]);
     }
@@ -91,17 +158,18 @@ const HolidayScreen = ({ route, navigation }) => {
             var id = stores[2][1];
             var access = stores[3][1];
             var id2 = stores[4][1];
-            if (myArray.length == 0) {
-                api = 'https://payrollv2.herokuapp.com/holiday/api/holiday?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-                await api1(api).then(() => { setLoader(true) })
-            } else {
-                setLoader(true)
-            }
+            z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            
+            api = 'https://payrollv2.herokuapp.com/holiday/api/holiday?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            api1(api)
+
 
 
 
         })
-    }, [navigation,])
+    }, [navigation])
+    React.useEffect(() => {
+    }, [change])
     return (
 
         <View style={styles.container}>
@@ -202,7 +270,7 @@ const HolidayScreen = ({ route, navigation }) => {
     )
 }
 
-const HolidayStackScreen = ({ navigation }) => {
+const HolidayStackScreen = ({ route, navigation }) => {
     return (
         <Stack.Navigator screenOptions={{
             headerStyle: {
@@ -215,14 +283,13 @@ const HolidayStackScreen = ({ navigation }) => {
         }}>
             <Stack.Screen
                 name="Manage Holidays"
-                component={HolidayScreen}
                 options={{
                     title: ' Manage Holidays ',
                     headerLeft: () => (
                         <FontAwesome.Button name="bars" size={25} backgroundColor="orange" onPress={() => navigation.openDrawer()} />
                     )
                 }}
-            />
+            >{props => <HolidayScreen {...props} param={route.params} />}</Stack.Screen>
         </Stack.Navigator>
     );
 }
@@ -238,7 +305,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         padding: 10,
-        marginTop: "0%",
+        marginTop: "50%",
     }, blck: {
         padding: "2%",
         margin: '0.5%',

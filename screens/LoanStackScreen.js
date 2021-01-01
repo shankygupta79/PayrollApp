@@ -68,6 +68,15 @@ const LoanScreen = ({ route, navigation }) => {
         try {
             const response = await fetch(api);
             const responseJson = await response.json();
+            if(responseJson==false){
+                Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                  { text: 'Okay' }
+                ]); 
+                setRef(false)
+                setSaving(false)
+                setLoader(true)
+                return
+            }
             myArray = [];
             total = 0
             for (var i = 0; i < responseJson.length; i++) {

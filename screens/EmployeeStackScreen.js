@@ -14,14 +14,16 @@ import Ripple from 'react-native-material-ripple';
 var { width, height } = Dimensions.get('window');
 const Stack = createStackNavigator();
 var sortfield = 'status'
+var id = ""
+var apix = ""
 var myArray = []
 var myArray2 = []
-var id=""
-var apix = ""
 var map = ["Name", "Status", "Date of Joining", "Designation"]
 const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 const EmployeeScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const [count, setCount] = React.useState(0);
+  const [change, setChange] = React.useState(0);
   const [visible, setVisible] = React.useState(false);
   const [loader, setLoader] = React.useState(false)
   const [showin, setShowin] = React.useState(false)
@@ -54,7 +56,6 @@ const EmployeeScreen = ({ navigation }) => {
   const onRefresh = () => {
     setRef(true);
     api1(apix);
-    setTimeout(function () { setRef(false) }, 1500);
 
   }
   const compare = (a, b) => {
@@ -77,24 +78,45 @@ const EmployeeScreen = ({ navigation }) => {
     }
     return 0;
   }
-  const api1 = async (api) => {
-    try {
-      const response = await fetch(api);
-      const responseJson = await response.json();
-      myArray = []
-      myArray2=[]
-      for (var i = 0; i < responseJson.length; i++) {
-        if (responseJson[i].status == 'Active') {
-          myArray.push(responseJson[i])
-        } else {
-          myArray2.push(responseJson[i])
+  const api1 = (api) => {
+    setLoader(false)
+    console.log("called")
+    console.log(api)
+    fetch(api)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log(responseJson)
+        if(responseJson==false){
+          Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+            { text: 'Okay' }
+          ]);
+          setRef(false)
+          setLoader(true)
+          return 
         }
-      }
-      console.log("Loaded")
-    } catch (error) {
-      console.error(error);
-      return await Promise.reject(false);
-    }
+        myArray = []
+        myArray2 = []
+        for (var i = 0; i < responseJson.length; i++) {
+          if (responseJson[i].status == 'Active') {
+            myArray.push(responseJson[i])
+          } else {
+            myArray2.push(responseJson[i])
+          }
+        }
+        setChange(change+1)
+        setRef(false)
+        console.log("Loaded")
+        setLoader(true)
+        return
+      }).catch((error) => {
+        console.error(error);
+        Alert.alert('Error Occured!', 'Some Error Occured.' + error, [
+          { text: 'Okay' }
+        ]);
+        setLoader(false)
+        setRef(false)
+        return
+      });
 
   }
   React.useEffect(() => {
@@ -102,21 +124,18 @@ const EmployeeScreen = ({ navigation }) => {
       setLoader(false)
       var admin = stores[0][1];
       var off = stores[1][1];
-      id = stores[2][1];
+      var id = (stores[2][1]);
       var access = stores[3][1];
       var id2 = stores[4][1];
-      console.log(api)
-      if (myArray.length == 0) {
-        apix = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-        api1(apix).then(() => { setLoader(true) })
-      } else {
-        setLoader(true)
-      }
-
-
+      apix = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+      api1(apix)
 
     });
-  }, [navigation,id])
+  }, [navigation])
+  React.useEffect(() => {
+  }, [change])
+
+
   return (
 
     <View style={styles.container}>
@@ -189,7 +208,7 @@ const EmployeeScreen = ({ navigation }) => {
 
           >
             <View style={[styles.blck, { backgroundColor: 'green' }]}>
-              <View style={{alignItems:'center'}}>
+              <View style={{ alignItems: 'center' }}>
                 <Text style={[styles.text2, { color: 'white' }]}>
                   Active Employees
                             </Text>
@@ -240,17 +259,17 @@ const EmployeeScreen = ({ navigation }) => {
             }
 
             )}
-            
+
             {showin ?
               <View>
                 <View style={[styles.blck, { backgroundColor: 'green' }]}>
-              <View style={{alignItems:'center'}}>
-                <Text style={[styles.text2, { color: 'white' }]}>
-                  In - Active Employees
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={[styles.text2, { color: 'white' }]}>
+                      In - Active Employees
                             </Text>
 
-              </View>
-            </View>
+                  </View>
+                </View>
                 {myArray2.map((item, key) => {
                   return <Animatable.View
                     animation="fadeInUpBig"
@@ -419,6 +438,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   }, text2: {
     fontSize: 15,
-    fontWeight:'bold'
+    fontWeight: 'bold'
   },
 });

@@ -15,6 +15,8 @@ import { set } from 'react-native-reanimated';
 const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 var date = "01-01-2000"
+var z=""
+var idx=0
 const { width, height } = Dimensions.get("screen");
 const EditHolScreen = (props,  {navigation} ) => {
   const { colors } = useTheme();
@@ -39,20 +41,69 @@ const EditHolScreen = (props,  {navigation} ) => {
 
   }
   
-  const save = () => {
-    console.log(data.name)
-    console.log(date)
+  const save = async () => {
+   
+    if(saving==true){
+      return
+    }
     if (data.name == "") {
       Alert.alert('Enter Name!', 'Holiday Name Field Cannot Be Empty.', [
         { text: 'Okay' }
       ]);
+    } else {
+      try {
+        setSaving(true)
+        fetch('http://payrollv2.herokuapp.com/holiday/edit_holpost?idx='+idx + z, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: data.name,
+            date: date,
+          })
+        }).then((response) => response.json())
+          .then((data) => {
+            setSaving(false)
+            if(data==false){
+              Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                { text: 'Okay' }
+              ]);
+              setRef(false)
+              setLoader(true)
+              return 
+            }
+            if(data.message=='true'){
+              Alert.alert('Success', 'Holiday Edit Successfully.', [
+                { text: 'Okay', onPress: () => { navigation.navigate('HolidayStackScreen',{refresh:true}) } }
+              ]);
+              return
+            }else{
+              Alert.alert('Some Error!', 'Try Again Some Error.', [
+                { text: 'Okay' }
+              ]);
+              setSaving(false)
+              return
+            }
+            
+          }).catch((e)=>{
+            Alert.alert('Some Error!', 'Try Again Some Error.'+e, [
+              { text: 'Okay' }
+            ]);
+            setSaving(false)
+            return
+          })  
 
-      setSaving(false)
-      return
+      } catch {
+        Alert.alert('Some Error!', 'Try Again Some Error.', [
+          { text: 'Okay' }
+        ]);
+        setSaving(false)
+        return
 
+      }
     }
-    setSaving(true)
-    setSaving(false)
   };
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -69,9 +120,10 @@ const EditHolScreen = (props,  {navigation} ) => {
       var id = stores[2][1];
       var access = stores[3][1];
       var id2 = stores[4][1];
-      console.log(props.hol)
+      idx=props.hol.hol_id
       date = props.hol.date
-      console.log(props.hol.holname)
+      z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+      setSaving(false)
       setData({ ...data, name: props.hol.holname })
       setLoader(true)
       //console.log(api2)
@@ -79,7 +131,7 @@ const EditHolScreen = (props,  {navigation} ) => {
 
 
     })
-  }, [navigation, props])
+  }, [props])
   return (
     <View style={styles.container}>
       <ScrollView refreshControl={

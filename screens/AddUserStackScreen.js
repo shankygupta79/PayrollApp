@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, View, Text, TextInput, Image, ScrollView, StyleSheet, Dimensions, RefreshControl, FlatList, TouchableHighlight } from 'react-native';
+import { Alert, View, Text, TextInput, Image, ScrollView, StyleSheet, Dimensions, RefreshControl, } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Feather from 'react-native-vector-icons/Feather';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -12,13 +12,14 @@ import { useTheme } from '@react-navigation/native';
 import BottomNav from './BottomNav.js';
 const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-
+var z = ""
 const { width, height } = Dimensions.get("screen");
 const AddUserScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
   const [button, setButton] = React.useState(true)
   const [loader, setLoader] = React.useState(false)
   const [ref, setRef] = React.useState(false)
+  const [change, setChange] = React.useState(0);
   const [checked1, setChecked1] = React.useState(false);
   const [checked2, setChecked2] = React.useState(false);
   const [checked3, setChecked3] = React.useState(false);
@@ -109,16 +110,86 @@ const AddUserScreen = ({ route, navigation }) => {
     if (button == false) {
       return
     }
-    console.log(data.username)
-    console.log(data.mail)
-    console.log(data.password)
-    console.log(data.confirm_password)
-
+    if (data.check_mail == false) {
+      Alert.alert('Check Mail!', 'Not an appropriate Mail ID.', [
+        { text: 'Okay' }
+      ]);
+      return
+    }
+    if (data.password < 8) {
+      Alert.alert('Check Password!', 'Password must be at least of 8 characters.', [
+        { text: 'Okay' }
+      ]);
+      return
+    }
+    if (data.password != data.confirm_password) {
+      Alert.alert('Check Password!', 'Password doesnt match !', [
+        { text: 'Okay' }
+      ]);
+      return
+    }
+    var x = checked1 + ";" + checked2 + ";" + checked3 + ";" + checked4 + ";" + checked5 + ";" + checked6 + ";";
+    var y = x + checked7 + ";" + checked8 + ";" + checked9 + ";" + checked10;
     setButton(false)
-    setTimeout(() => {
+    try {
+      fetch('http://payrollv2.herokuapp.com/users/add_userpost' + z, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          y: y,
+          password: data.password,
+          mail: data.mail,
+          name: data.username
+        })
+      }).then((response) => response.json())
+        .then((data) => {
+          setButton(true)
+          if(data==false){
+            Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+              { text: 'Okay' }
+            ]);
+            setRef(false)
+            setLoader(true)
+            return 
+          }
+          if (data.message == 'true') {
+            setData({
+              username: '',
+              password: '',
+              confirm_password: '',
+              mail: '',
+              check_textInputChange: false,
+              check_name: false,
+              check_mail: false,
+              secureTextEntry: true,
+              confirm_secureTextEntry: true,
+            })
+            setChange(change + 1)
+            Alert.alert('Success', 'User Added Successfully.', [
+              { text: 'Okay', onPress: () => { navigation.navigate('UsersStackScreen', { refresh: true }) } }
+            ]);
+            return
+          } else {
+            Alert.alert('Some Error!', 'Try Again Some Error.', [
+              { text: 'Okay' }
+            ]);
 
+            return
+          }
+
+        })
+
+    } catch {
+      Alert.alert('Some Error!', 'Try Again Some Error.', [
+        { text: 'Okay' }
+      ]);
       setButton(true)
-    }, 1000)
+      return
+
+    }
   };
 
   React.useEffect(() => {
@@ -129,13 +200,14 @@ const AddUserScreen = ({ route, navigation }) => {
       var id = stores[2][1];
       var access = stores[3][1];
       var id2 = stores[4][1];
+      z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       setLoader(true)
       //console.log(api2)
       //await api1(api).then(() => { setLoader(true) })
 
 
     })
-  }, [navigation])
+  }, [navigation, change])
   return (
     <View style={styles.container}>
       <ScrollView refreshControl={
@@ -164,7 +236,7 @@ const AddUserScreen = ({ route, navigation }) => {
                 />
                 <TextInput
                   placeholder="Your Username"
-                  style={[styles.textInput,{color:colors.text}]}
+                  style={[styles.textInput, { color: colors.text }]}
                   autoCapitalize="none"
                   onChangeText={(val) => textInputChange(val)}
                 />
@@ -192,7 +264,7 @@ const AddUserScreen = ({ route, navigation }) => {
                 />
                 <TextInput
                   placeholder="Your Email"
-                  style={[styles.textInput,{color:colors.text}]}
+                  style={[styles.textInput, { color: colors.text }]}
                   autoCapitalize="none"
                   onChangeText={(val) => mailfun(val)}
                 />
@@ -220,7 +292,7 @@ const AddUserScreen = ({ route, navigation }) => {
                 <TextInput
                   placeholder="Your Password"
                   secureTextEntry={data.secureTextEntry ? true : false}
-                  style={[styles.textInput,{color:colors.text}]}
+                  style={[styles.textInput, { color: colors.text }]}
                   autoCapitalize="none"
                   onChangeText={(val) => handlePasswordChange(val)}
                 />
@@ -255,7 +327,7 @@ const AddUserScreen = ({ route, navigation }) => {
                 <TextInput
                   placeholder="Confirm Your Password"
                   secureTextEntry={data.confirm_secureTextEntry ? true : false}
-                  style={[styles.textInput,{color:colors.text}]}
+                  style={[styles.textInput, { color: colors.text }]}
                   autoCapitalize="none"
                   onChangeText={(val) => handleConfirmPasswordChange(val)}
                 />
@@ -278,13 +350,13 @@ const AddUserScreen = ({ route, navigation }) => {
                 </TouchableOpacity>
               </View>
               <Text style={[styles.text_footer, {
-                marginTop: 20,marginBottom:15, color: colors.text
+                marginTop: 20, marginBottom: 15, color: colors.text
               }]}>Module Access</Text>
               <View style={{ flex: 1, flexDirection: 'row', width: '100%', alignItems: 'center' }}>
-                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text }]}>
+                <Text style={[styles.text_footer, { fontSize: 16, width: width * 0.4, color: colors.text }]}>
                   Employee
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked1 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -292,12 +364,12 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     View
               </Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked2 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -305,17 +377,17 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     Edit
               </Text>
                 </View>
               </View>
 
-              <View style={{ flex: 1, flexDirection: 'row', width: '100%',  alignItems: 'center' }}>
-                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text }]}>
+              <View style={{ flex: 1, flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                <Text style={[styles.text_footer, { fontSize: 16, width: width * 0.4, color: colors.text }]}>
                   Department
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked3 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -323,12 +395,12 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     View
               </Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked4 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -336,17 +408,17 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     Edit
               </Text>
                 </View>
               </View>
 
-              <View style={{ flex: 1, flexDirection: 'row', width: '100%',  alignItems: 'center' }}>
-                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text, }]}>
+              <View style={{ flex: 1, flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                <Text style={[styles.text_footer, { fontSize: 16, width: width * 0.4, color: colors.text, }]}>
                   Attendance
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked5 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -354,12 +426,12 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     View
               </Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked6 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -367,17 +439,17 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     Edit
               </Text>
                 </View>
               </View>
 
-              <View style={{ flex: 1, flexDirection: 'row', width: '100%',  alignItems: 'center' }}>
-                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text }]}>
+              <View style={{ flex: 1, flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                <Text style={[styles.text_footer, { fontSize: 16, width: width * 0.4, color: colors.text }]}>
                   Holidays
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked7 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -385,12 +457,12 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     View
               </Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked8 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -398,17 +470,17 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     Edit
               </Text>
                 </View>
               </View>
 
-              <View style={{ flex: 1, flexDirection: 'row', width: '100%',  alignItems: 'center' }}>
-                <Text style={[styles.text_footer, { fontSize: 16,width:width*0.4,color:colors.text }]}>
+              <View style={{ flex: 1, flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                <Text style={[styles.text_footer, { fontSize: 16, width: width * 0.4, color: colors.text }]}>
                   Payslips
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center',width:width*0.3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: width * 0.3 }}>
                   <Checkbox
                     status={checked9 ? 'checked' : 'unchecked'}
                     onPress={() => {
@@ -416,7 +488,7 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     View
               </Text>
                 </View>
@@ -429,13 +501,13 @@ const AddUserScreen = ({ route, navigation }) => {
                     }}
                     color={'coral'}
                   />
-                  <Text style={{color:colors.text}}>
+                  <Text style={{ color: colors.text }}>
                     Edit
               </Text>
                 </View>
               </View>
 
-              
+
 
               <View style={styles.button}>
                 <TouchableOpacity
@@ -510,7 +582,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
-    marginTop: "0%",
+    marginTop: "50%",
   }, header: {
     flex: 1,
     justifyContent: 'flex-end',

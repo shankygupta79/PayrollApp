@@ -1,15 +1,14 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Avatar, } from 'react-native-paper';
+import { TextInput, Alert, View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { Checkbox, ActivityIndicator, Avatar, } from 'react-native-paper';
 import CalendarStrip from './CalendarStrip';
 import { createStackNavigator } from '@react-navigation/stack';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-community/async-storage';
-import ToggleSwitch from 'toggle-switch-react-native'
 import { useTheme } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import BottomNav from './BottomNav.js';
-import Ripple from 'react-native-material-ripple';
+var z=""
 const Stack = createStackNavigator();
 var selectedDate = '2018-01-01'
 var dx = 0
@@ -19,8 +18,11 @@ var x = '2018-01'
 var admin = '';
 var off = '';
 var id = '';
+var api=""
 var access = '';
 var id2 = '';
+var dxt=""
+const { width, height } = Dimensions.get("screen");
 const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 const AttendanceScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -28,15 +30,18 @@ const AttendanceScreen = ({ navigation }) => {
   const [saving, setSaving] = React.useState(false)
 
   const [loader, setLoader] = React.useState(false)
-  const mark = (i) => {
+  const mark = (i, x) => {
     var data = myArray;
-    myArray[i].status = !myArray[i].status;
+    myArray[i].status = x;
     setChange(change + 1)
 
   }
+  const handleChange = (i, val) => {
+    myArray[i].etb = val
+    setChange(change + 1)
+  }
   const getdata = () => {
     setLoader(false)
-    console.log(selectedDate)
     var mon = selectedDate.getMonth() + 1
     if (mon < 10) {
       mon = "0" + mon
@@ -45,7 +50,6 @@ const AttendanceScreen = ({ navigation }) => {
     dx = parseInt(selectedDate.getDate())
     x = mon + "-" + yeaar;
     api = 'https://payrollv2.herokuapp.com/attendance/api/attendance?date=' + x + '&dx=' + dx + '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-    console.log(api)
 
     //setContent([a, a, a, a])
 
@@ -55,9 +59,14 @@ const AttendanceScreen = ({ navigation }) => {
         console.log("ATT API")
         //console.log(responseJson)
         if (responseJson == '5') {
-          console.log('Chart for New Month Created')
+          Alert.alert('Chart for this Month Created!', 'Reload to mark Attendance !', [
+            { text: 'Okay' }
+          ]);
+          setLoader(true)
         } else if (responseJson == '0') {
-          console.log('You Dont have access to View')
+          Alert.alert('No Access', 'You Dont Have Access to View', [
+            { text: 'Okay' }
+          ]);
         } else {
           myArray = []
           for (var i = 0; i < responseJson.length; i++) {
@@ -67,13 +76,12 @@ const AttendanceScreen = ({ navigation }) => {
             temp = temparray[(dx - 1) * 2]
             var st = responseJson[i].present[dx - 1]
             if (st == '-') {
-              tpr = true
+              tpr = "none"
             } else if (st == 'A') {
               tpr = false
             } else {
               tpr = true
             }
-
             var entry = {
               idx: i,
               empid: responseJson[i].emp_id,
@@ -91,10 +99,8 @@ const AttendanceScreen = ({ navigation }) => {
               expand: false,
 
             }
-            console.log(tpr)
             myArray.push(entry)
           }
-          //console.log(myArray)
           setChange(change)
           setLoader(true)
           total = myArray.length;
@@ -102,7 +108,109 @@ const AttendanceScreen = ({ navigation }) => {
       })
       .catch((error) => {
         console.error(error);
+        Alert.alert('Error Occured!', 'Some Error Occured.' + error, [
+          { text: 'Okay' }
+        ]);
+        setLoader(false)
+        return
       });
+  }
+  const attendance = async (j) => {
+    return new Promise((resolve, reject) => {
+      console.log(j)
+      var y = '';
+      for (var i = 0; i < 61; i++) {
+        if (i == 2 * (dx - 1)) {
+          y = y + myArray[j].etb
+        } else {
+          y = y + myArray[j].etbarr[i];
+        }
+      }
+      var tp = myArray[j].presentarr
+      var tp2 = myArray[j].marked
+      if (myArray[j].status == "none") {
+        myArray[j].status = "-";
+      }else if(myArray[j].status==true){
+        myArray[j].status = "Present";
+      }else{
+        myArray[j].status = "Absent";
+      }
+      console.log(myArray[j].status)
+      if (myArray[j].status[0] == undefined) {
+        reject("P")
+      }
+      tp = tp.substring(0, dx - 1) + myArray[j].status[0] + tp.substring(dx);
+      
+      tp2 = tp2.substring(0, dx - 1) + "1" + tp2.substring(dx);
+
+      var abc = '';
+      if (dx == dxt) {
+        var abc = myArray[j].status[0]
+      }
+      try {
+
+        fetch('http://payrollv2.herokuapp.com/attendance/edit' + z, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            present: tp,
+            etb: y,
+            empid: myArray[j].empid,
+            quick: abc,
+            marked: tp2,
+            dx: dx,
+            monthyear: myArray[j].monthyear,
+            attby: myArray[j].attbyarr,
+          })
+        }).then((response) => response.json())
+          .then((data) => {
+            if (data == false) {
+              Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                { text: 'Okay' }
+              ]);
+              setRef(false)
+              setLoader(true)
+              return
+            }
+            if (myArray[j].status == "-") {
+              myArray[j].status = "none";
+            }else if(myArray[j].status=="Present"){
+              myArray[j].status = true;
+            }else{
+              myArray[j].status = false;
+            }
+            if (data.message != 'true') {
+              reject("P")
+            } else {
+              resolve("A")
+            }
+          })
+      } catch {
+        Alert.alert('Some Error!', 'Try Again Some Error.', [
+          { text: 'Okay' }
+        ]);
+        setLoader(true)
+        return
+
+      }
+    })
+  }
+
+  const save = async () => {
+    setSaving(true)
+    for (var i = 0; i < myArray.length; i++) {
+      var a = await attendance(i);
+      console.log(a)
+
+    }
+    Alert.alert('Attendance Marked', 'Attendance Marked for '+selectedDate, [
+      { text: 'Okay' }
+    ]);
+    setSaving(false)
+
   }
   const expand = (i) => {
     var data = myArray;
@@ -113,13 +221,15 @@ const AttendanceScreen = ({ navigation }) => {
   React.useEffect(() => {
     selectedDate = new Date()
     AsyncStorage.multiGet(keys, (err, stores) => {
+      var today = new Date();
+      dxt = today.getDate()
       setLoader(false)
       admin = stores[0][1];
       off = stores[1][1];
       id = stores[2][1];
       access = stores[3][1];
       id2 = stores[4][1];
-
+      z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       getdata()
 
     });
@@ -167,26 +277,69 @@ const AttendanceScreen = ({ navigation }) => {
             />{
               myArray.map((item, key) => {
                 return <View style={{ borderRadius: 20, margin: '0.5%', backgroundColor: colors.back2 }} key={item.idx} >
-                  <View style={[styles.list, {
-                  }]}>
+                  <View style={[styles.list,]}>
 
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: "25%" }}>
+                      {item.expand ? <View><FontAwesome.Button backgroundColor={colors.back2} color="grey" name="caret-up" onPress={() => expand(item.idx)} />
+                      </View> : <View>
+                          <FontAwesome.Button backgroundColor={colors.back2} color="grey" name="caret-down" onPress={() => expand(item.idx)} /></View>}
 
-                    {item.expand ? <View><FontAwesome.Button backgroundColor={colors.back2} color="grey" name="caret-up" onPress={() => expand(item.idx)} />
-                    </View> : <View>
-                        <FontAwesome.Button backgroundColor={colors.back2} color="grey" name="caret-down" onPress={() => expand(item.idx)} /></View>}
-
-                    <Avatar.Image size={74} source={{ uri: item.photo }} />
-                    <Text style={[{ flexDirection: "column", fontSize: 18, width: "50%", color: colors.text }]} numberOfLines={2}>{item.name} </Text>
-
-                    <ToggleSwitch offColor={'#f05661'} isOn={item.status} onToggle={isOn => mark(item.idx)} />
+                      <Avatar.Image size={width * 0.15} source={{ uri: item.photo }} />
+                    </View>
+                    <Text style={[{ flexDirection: "column", fontSize: 18, width: "40%", paddingLeft: 5, color: colors.text }]} numberOfLines={2}>{item.name} </Text>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', marginRight: 20, width: '25%' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <Checkbox
+                          status={item.status == true ? 'checked' : 'unchecked'}
+                          onPress={() => {
+                            mark(key, true);
+                          }}
+                          color={'green'}
+                        />
+                        <Text style={{ color: colors.text }}>
+                          Present
+                      </Text>
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Checkbox
+                          status={item.status == false ? 'checked' : 'unchecked'}
+                          onPress={() => {
+                            mark(key, false);
+                          }}
+                          color={'red'}
+                        />
+                        <Text style={{ color: colors.text }}>
+                          Absent{" "}
+                        </Text>
+                      </View>
+                    </View>
 
 
 
                   </View>
                   {item.expand ?
                     <View style={{ flexDirection: 'column', alignItems: 'center', color: colors.text, backgroundColor: colors.back2, }}>
-                      <Text style={[{ color: colors.text }]}>Attendance By : Admin</Text>
-                      <Text style={[{ color: colors.text }]}>Extra Time Bonus : Rs. 0</Text>
+                      <View>
+                        {item.marked[dx - 1] == "0" ? <Text style={[{ color: colors.text }]}>Not Marked</Text> : <View>
+                          {
+                            item.attby == "1" ? <Text style={[{ color: colors.text }]}>Attendance By : Admin</Text>
+                              : <Text style={[{ color: colors.text }]}>Attendance By : User </Text>
+
+                          }
+                        </View>}
+                      </View>
+                      <View style={{ flexDirection: "row" }}>
+                        <Text style={[{ color: colors.text }]}>Extra Time Bonus : ₹ </Text>
+                        <TextInput
+                          placeholder="0"
+                          keyboardType={"numeric"}
+                          style={[styles.textInput, { color: colors.text }]}
+                          autoCapitalize="none"
+                          onChangeText={(val) => handleChange(key, val)}
+                          value={item.etb}
+                        />
+                      </View>
+
                     </View> : null}
 
                 </View>
@@ -198,7 +351,7 @@ const AttendanceScreen = ({ navigation }) => {
                 style={[styles.signIn, {
                   marginTop: 15
                 }]}
-                onPress={() => { console.log("SAVED"); setSaving(true) }}
+                onPress={() => { console.log("SAVED"); save() }}
               >
                 <LinearGradient
                   colors={['#d42424', '#96358d']}
@@ -307,5 +460,9 @@ const styles = StyleSheet.create({
   textSign: {
     fontSize: 18,
     fontWeight: 'bold'
-  }
+  }, textInput: {
+    marginTop: Platform.OS === 'ios' ? 0 : -6,
+    paddingLeft: 10,
+    color: '#05375a',
+  },
 });

@@ -43,6 +43,7 @@ var list = {
 const LedgerScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const [loader, setLoader] = React.useState(false)
+  const [xx, setXX] = React.useState(true)
   const [ref, setRef] = React.useState(false)
   const [select1, setSelect1] = React.useState("")
   const [visible1, setVisible1] = React.useState(false)
@@ -58,7 +59,6 @@ const LedgerScreen = ({ navigation }) => {
   const onRefresh = () => {
     setRef(true);
     api1(apix);
-    setTimeout(function () { setRef(false) }, 1500);
 
   }
   const year = () => {
@@ -73,21 +73,29 @@ const LedgerScreen = ({ navigation }) => {
     setSelect3("" + n - 1)
   }
   const api1 = async (api) => {
-    try {
-      const response = await fetch(api);
-      const responseJson = await response.json();
+    setLoader(false)
+    return fetch(api)
+            .then((response) => response.json())
+            .then((responseJson) => {
       myArray = [];
       idx = []
-      totalloan=[]
+      totalloan = []
       for (var i = 0; i < responseJson.length; i++) {
         myArray.push(responseJson[i].name);
-        totalloan.push({name:responseJson[i].name,loan:responseJson[i].totalloan})
+        totalloan.push({ name: responseJson[i].name, loan: responseJson[i].totalloan })
         idx.push(responseJson[i].emp_id);
       }
-    } catch (error) {
+      setRef(false)
+      setLoader(true)
+    }). catch (error=> {
       console.error(error);
-      return await Promise.reject(false);
-    }
+      Alert.alert('Error Occured!', 'Some Error Occured.' + e, [
+        { text: 'Okay' }
+      ]);
+      setRef(false)
+      setLoader(true)
+      return
+    })
 
   };
   const view = async () => {
@@ -102,67 +110,126 @@ const LedgerScreen = ({ navigation }) => {
       setSaving(false)
       return;
     }
+    setSaving(true);
     loan1 = 0; loan2 = 0; adv1 = 0; adv2 = 0
     var z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
     var ap1 = 'http://payrollv2.herokuapp.com/payslips/getloan?idx=' + idx[myArray.indexOf(select1)] + z
-    var ap2 = 'http://payrollv2.herokuapp.com/payslips/getadv?idx=' + idx[myArray.indexOf(select1)] + '&monthyear=' + (arr[monthlist.indexOf(select2)] + select3) + z
-    var ap3 = 'https://payrollv2.herokuapp.com/payslips/api/data?date=' + arr[monthlist.indexOf(select2)] + select3 + "&emp=" + idx[myArray.indexOf(select1)] + z;
-    try {
-      const response = await fetch(ap1);
-      loan = await response.json();
-      const response3 = await fetch(ap3);
-      list = await response3.json();
-      if (response3.length == 0) {
-        Alert.alert('No Record!', 'No Record Found.', [
+    fetch(ap1)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        if(responseJson==false){
+          Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+            { text: 'Okay' }
+          ]);
+          setRef(false)
+          setSaving(false)
+          setLoader(true)
+          return
+      }
+        loan = responseJson
+        for (var i = 0; i < loan.length; i++) {
+          if (loan[i].type == 0) {
+            loan1 += loan[i].amount
+          } else {
+            loan2 += loan[i].amount
+          }
+        }
+        loan.reverse();
+      }).catch((e) => {
+        Alert.alert('Error Occured!', 'Some Error Occured.' + e, [
           { text: 'Okay' }
         ]);
         setSaving(false)
-        return
+      })
+    var ap2 = 'http://payrollv2.herokuapp.com/payslips/getadv?idx=' + idx[myArray.indexOf(select1)] + '&monthyear=' + (arr[monthlist.indexOf(select2)] + select3) + z
+    fetch(ap2)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        if(responseJson==false){
+          Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+            { text: 'Okay' }
+          ]);
+          setRef(false)
+          setSaving(false)
+          setLoader(true)
+          return
+      }
+        adv = responseJson
+        for (var i = 0; i < adv.length; i++) {
+          if (adv[i].type == 0) {
+            adv1 += adv[i].amount
+          } else {
+            adv2 += adv[i].amount
+          }
+        }
+        adv.reverse();
 
-      }
-      var days = monthday[monthlist.indexOf(select2)]
+      }).catch((e) => {
+        Alert.alert('Error Occured!', 'Some Error Occured.' + e, [
+          { text: 'Okay' }
+        ]);
+        setSaving(false)
+      })
 
-      var extrarr = list.extratime.split(';')
-      var prearr = list.present
-      list.emiold = list.emi;
-      var extra = 0
-      var ab = 0
-      for (var j = 0; j < days; j++) {
-        extra = extra + parseInt(extrarr[j])
-        if (prearr[j] == 'A') {
-          ab++
-        }
+    var ap3 = 'https://payrollv2.herokuapp.com/payslips/api/data?date=' + arr[monthlist.indexOf(select2)] + select3 + "&emp=" + idx[myArray.indexOf(select1)] + z;
+    console.log(ap3)
+    setXX(false)
+    fetch(ap3)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        if(responseJson==false){
+          Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+            { text: 'Okay' }
+          ]);
+          setRef(false)
+          setSaving(false)
+          setLoader(true)
+          return
       }
-      list.extratimetotoal = extra
-      list.holidays = Math.round(list['employee_quick'].salary / days) * ab
-      for (var i = 0; i < loan.length; i++) {
-        if (loan[i].type == 0) {
-          loan1 += loan[i].amount
-        } else {
-          loan2 += loan[i].amount
+        list = responseJson
+        var x=[list]
+        console.log(x)
+        console.log("Heya")
+        if (x.length==0) {
+          Alert.alert('No Record!', 'No Record Found.', [
+            { text: 'Okay' }
+          ]);
+          setSaving(false)
+          return
         }
-      }
-      const response2 = await fetch(ap2);
-      adv = await response2.json();
-      loan.reverse();
-      adv.reverse();
-      for (var i = 0; i < adv.length; i++) {
-        if (adv[i].type == 0) {
-          adv1 += adv[i].amount
-        } else {
-          adv2 += adv[i].amount
+
+        var days = monthday[monthlist.indexOf(select2)]
+
+        var extrarr = list.extratime.split(';')
+        var prearr = list.present
+        list.emiold = list.emi;
+        var extra = 0
+        var ab = 0
+        for (var j = 0; j < days; j++) {
+          extra = extra + parseInt(extrarr[j])
+          if (prearr[j] == 'A') {
+            ab++
+          }
         }
-      }
-      setData(true)
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Some Error Occured!', 'Error is .' + error, [
-        { text: 'Okay' }
-      ]);
-      setSaving(false)
-      return await Promise.reject(false);
-    }
-    setSaving(false)
+        list.extratimetotoal = extra
+        list.holidays = Math.round(list['employee_quick'].salary / days) * ab
+        setData(true)
+        setXX(true)
+        setSaving(false)
+      }).catch((e) => {
+        Alert.alert('No Record!', 'No Record Found.', [
+          { text: 'Okay' }
+        ]);
+        console.log(list)
+        list={}
+        setData(true)
+        setXX(false)
+        setSaving(false)
+      })
+
+
+
+
   }
 
   React.useEffect(() => {
@@ -183,7 +250,7 @@ const LedgerScreen = ({ navigation }) => {
       }
 
     })
-  }, [navigation,id])
+  }, [navigation, id])
   return (
     <View style={styles.container}>
       <View style={styles.touchableOpacityStyle}>
@@ -224,7 +291,7 @@ const LedgerScreen = ({ navigation }) => {
         <Ripple
           activeOpacity={0.7}
           style={styles.menu}
-          onPress={() => navigation.navigate('LoanStackScreen',{ myArray: myArray,totalloan:totalloan})}>
+          onPress={() => navigation.navigate('LoanStackScreen', { myArray: myArray, totalloan: totalloan })}>
           <FontAwesome name="eye" size={15} backgroundColor="orange" color="white" />
           <Text style={{ color: 'white' }}>{"  "}View Loans</Text>
 
@@ -270,7 +337,7 @@ const LedgerScreen = ({ navigation }) => {
           <View style={styles.button}>
 
             <TouchableOpacity
-              onPress={() => { console.log("CLICKED"); setSaving(true); view() }} >
+              onPress={() => { console.log("CLICKED");  view() }} >
               <LinearGradient
                 colors={['#fc03d3', '#fc03d3', '#215cdb']}
                 style={styles.signIn}
@@ -330,6 +397,7 @@ const LedgerScreen = ({ navigation }) => {
           </View>
 
           {data ? <View>
+            {xx?<View>
             <View style={[styles.blck, { backgroundColor: '#4d47f5' }]}>
               <View style={[styles.table, { justifyContent: 'center' }]}>
                 <Text style={[{ color: 'white', fontSize: 15 }]}>
@@ -424,6 +492,8 @@ const LedgerScreen = ({ navigation }) => {
                 </Text>
               </View>
             </View>
+            </View>
+          :null}
 
 
             <View>
@@ -568,7 +638,7 @@ const LedgerScreen = ({ navigation }) => {
               </View>
             </View>
           </View> : null}
-          <View style={{height:height*0.1}}>
+          <View style={{ height: height * 0.1 }}>
             <Text>
 
             </Text>

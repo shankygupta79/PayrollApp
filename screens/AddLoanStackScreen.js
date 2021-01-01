@@ -12,56 +12,65 @@ import { SinglePickerMaterialDialog } from 'react-native-material-dialog';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@react-navigation/native';
 import BottomNav from './BottomNav.js';
-import { set } from 'react-native-reanimated';
 const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 var myArray = []
 var idx = []
 var apix = ""
-const api1 = async (api) => {
-    try {
-        const response = await fetch(api);
-        const responseJson = await response.json();
-        console.log("Refreshed")
-        myArray = [];
-        idx = []
-        for (var i = 0; i < responseJson.length; i++) {
-            myArray.push(responseJson[i].name);
-            idx.push(responseJson[i].emp_id);
-        }
-    } catch (error) {
-        console.error(error);
-        return await Promise.reject(false);
-    }
+var z = ""
+var mon= ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+                
 
-};
 const { width, height } = Dimensions.get("screen");
-const AddLoanScreen = ( { route, navigation }) => {
+const AddLoanScreen = ({ route, navigation }) => {
     const { colors } = useTheme();
     const [checked, setChecked] = React.useState('0');
     const [loader, setLoader] = React.useState(false)
     const [saving, setSaving] = React.useState(false)
     const [ref, setRef] = React.useState(false)
     const [select1, setSelect1] = React.useState("")
+    const [change, setChange] = React.useState(0);
     const [visible1, setVisible1] = React.useState(false)
     const handleNameChange = (val) => { setData({ ...data, name: val }); }
     const handleAmountChange = (val) => { setData({ ...data, amount: val }); }
     const onRefresh = () => {
         setRef(true);
         api1(apix);
-        setTimeout(function () { setRef(false) }, 1500);
 
     }
+    const api1 = async (api) => {
+        setLoader(false)
+        fetch(api)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                console.log("Refreshed")
+                myArray = [];
+                idx = []
+                for (var i = 0; i < responseJson.length; i++) {
+                    myArray.push(responseJson[i].name);
+                    idx.push(responseJson[i].emp_id);
+                }
+                setLoader(true)
+                setRef(false)
+            }).catch(error => {
+                console.error(error);
+                Alert.alert('Error Occured!', 'Some Error Occured.' + error, [
+                    { text: 'Okay' }
+                ]);
+                setLoader(true)
+                setRef(false)
+            })
+
+    };
     const [data, setData] = React.useState({
         name: '',
         amount: 0,
     })
 
     const save = () => {
-        console.log(select1)
-        console.log(checked)
-        console.log(data.name)
-        console.log(data.amount)
+        if(saving==true){
+            return
+        }
         if (select1 == "") {
             Alert.alert('Select Employee!', 'Employee Name Field Cannot Be Empty.', [
                 { text: 'Okay' }
@@ -88,7 +97,75 @@ const AddLoanScreen = ( { route, navigation }) => {
 
         }
         setSaving(true)
-        setSaving(false)
+        try {
+            var d = new Date();
+            var dt = d.getDate();
+            if (dt < 10) {
+                dt = 0 + "" + dt;
+            }
+            setSaving(true)
+            fetch('http://payrollv2.herokuapp.com/payslips/loanadd' + z, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: data.amount,
+                    text: data.name,
+                    type: checked,
+                    emp_id: idx[myArray.indexOf(select1)],
+                    date: dt + "-" + mon[d.getMonth()] + "-" + d.getFullYear(),
+                })
+            }).then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
+
+                    setSaving(false)
+                    if(data==false){
+                        Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                          { text: 'Okay' }
+                        ]); 
+                        setRef(false)
+                        setSaving(false)
+                        setLoader(true)
+                        return
+                    }
+                    if(data==false){
+                        Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                          { text: 'Okay' }
+                        ]);
+                        setRef(false)
+                        setSaving(false)
+                        setLoader(true)
+                        return
+                    }
+                    if (data.message == 'true') {
+                        setChange(change + 1)
+                        Alert.alert('Success', 'Loan Added Successfully.', [
+                            { text: 'Okay', onPress: () => { navigation.navigate('LedgerStackScreen', { refresh: true }) } }
+                        ]);
+                        setData({name:'',amount:0})
+                        setSelect1("")
+                        return
+                    } else {
+                        Alert.alert('Some Error!', 'Try Again Some Error.', [
+                            { text: 'Okay' }
+                        ]);
+
+                        return
+                    }
+
+                })
+
+        } catch {
+            Alert.alert('Some Error!', 'Try Again Some Error.', [
+                { text: 'Okay' }
+            ]);
+            setSaving(false)
+            return
+
+        }
     };
 
     React.useEffect(() => {
@@ -99,14 +176,17 @@ const AddLoanScreen = ( { route, navigation }) => {
             var id = stores[2][1];
             var access = stores[3][1];
             var id2 = stores[4][1];
+
             setLoader(true)
             apix = 'https://payrollv2.herokuapp.com/employee/api/quickemp?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+
             //console.log(api2)
             //await api1(api).then(() => { setLoader(true) })
 
 
         })
-    }, [navigation ])
+    }, [navigation, change])
     return (
         <View style={styles.container}>
             <ScrollView refreshControl={
@@ -144,7 +224,7 @@ const AddLoanScreen = ( { route, navigation }) => {
 
                         <View style={[styles.tab, { backgroundColor: colors.backgroundColor, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]} >
 
-                            <Text style={[styles.heading,{  color: colors.text, }]}>
+                            <Text style={[styles.heading, { color: colors.text, }]}>
                                 Employee
                         </Text>
                             <Ripple style={styles.xyz} onPress={() => { setVisible1(!visible1) }}>
@@ -275,7 +355,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         padding: 10,
-        marginTop: "0%",
+        marginTop: "50%",
     }, button: {
         alignItems: 'center',
         marginTop: 5

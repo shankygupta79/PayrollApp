@@ -67,6 +67,14 @@ const UserScreen = ({ route, navigation }) => {
         try {
             const response = await fetch(api);
             const responseJson = await response.json();
+            if(responseJson==false){
+                Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                  { text: 'Okay' }
+                ]);
+                setRef(false)
+                setLoader(true)
+                return 
+              }
             myArray = responseJson
             //console.log(myArray)
             sort('Username')
@@ -239,7 +247,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         padding: 10,
-        marginTop: "0%",
+        marginTop: "50%",
     }, blck: {
         padding: "2%",
         margin: '0.5%',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, TouchableOpacity, TextInput, Button, View, Text, ScrollView, StyleSheet, ActivityIndicator, Dimensions, RefreshControl, } from 'react-native';
+import { Alert, Image, TouchableOpacity, TextInput, Button, View, Text, ScrollView, StyleSheet, ActivityIndicator, Dimensions, RefreshControl, } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox, Avatar, } from 'react-native-paper';
@@ -14,6 +14,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Constants from 'expo-constants';
 import Ripple from 'react-native-material-ripple';
 import BottomNav from './BottomNav.js';
+const { width, height } = Dimensions.get("screen");
 const Stack = createStackNavigator();
 const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 var admin = '';
@@ -21,6 +22,7 @@ var off = '';
 var id = '';
 var apix = ""
 var id2 = '';
+var z = ""
 var access = '';
 var camera = ''
 function takePicture() {
@@ -35,6 +37,8 @@ const AddEmpScreen = ({ navigation }) => {
     const [image, setImage] = React.useState(null);
     const [saving, setSaving] = React.useState(false)
     const [loader, setLoader] = React.useState(false)
+    const [images, setImages] = React.useState("")
+    const [imagesloading, setImageLoading] = React.useState(false)
     const [select1, setSelect1] = React.useState("")
     const [visible1, setVisible1] = React.useState(false)
     const [isDatePickerVisible, setDatePickerVisibility] = React.useState(false);
@@ -42,7 +46,7 @@ const AddEmpScreen = ({ navigation }) => {
         whichdate = a
         setDatePickerVisibility(true);
     };
-   
+
     const hideDatePicker = () => {
 
         setDatePickerVisibility(false);
@@ -82,6 +86,7 @@ const AddEmpScreen = ({ navigation }) => {
     const [checked1, setChecked1] = React.useState(true);
     const [checked2, setChecked2] = React.useState(true);
     const [selectedStatus, setSelectedStatus] = React.useState("Active")
+    const [change, setChange] = React.useState(0);
     const [data, setData] = React.useState({
         name: '',
         gender: 'Male',
@@ -113,27 +118,174 @@ const AddEmpScreen = ({ navigation }) => {
             if (Platform.OS !== 'web') {
                 const { status } = await ImagePicker.requestCameraRollPermissionsAsync();
                 if (status !== 'granted') {
-                    alert('Sorry, we need camera roll permissions to upload image!');
+                    Alert.alert('Sorry, we need camera roll permissions to upload image!');
                 }
             }
         })();
     }, [navigation]);
+    React.useEffect(() => {
+
+    }, [change])
     const api1 = async (api) => {
-        try {
-            const response = await fetch(api);
-            var myArrayx = await response.json();
-            myArray = []
-            for (var i = 0; i < myArrayx.length; i++) {
-                myArray.push(myArrayx[i].depname)
-            }
-        } catch (error) {
-            console.error(error);
-            return await Promise.reject(false);
-        }
+        setLoader(false)
+        console.log("API CALLED")
+        fetch(api)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                var myArrayx = responseJson
+                myArray = []
+                for (var i = 0; i < myArrayx.length; i++) {
+                    myArray.push(myArrayx[i].depname)
+
+                }
+                setLoader(true)
+                setRef(false);
+            }).catch((error) => {
+                console.error(error);
+                Alert.alert('Error Occured!', 'Some Error Occured.' + error, [
+                    { text: 'Okay' }
+                ]);
+                setLoader(true)
+                return
+            })
+
 
     };
+    const save = async () => {
+        if(imagesloading==true){
+            Alert.alert('Image Uploading !', 'Try Again after Image Upload is Done.', [
+                { text: 'Okay' }
+            ]);
+            return
+        }
+        if(saving==true){
+            return
+        }
+        console.log(data)
+        console.log(date)
+        console.log(dateob)
+        console.log(select1)
+
+        var gender_f = ""
+        var status_f = ""
+        var photu = ""
+        if (checked2 == true) {
+            gender_f = "Male"
+            photu = "https://res.cloudinary.com/shankygupta79/image/upload/v1592573101/emp_man2_2_cazxts.jpg";
+        } else {
+            gender_f = "Female"
+            photu = "https://res.cloudinary.com/shankygupta79/image/upload/v1592573098/emp_fem_y1vkfa.jpg";
+        }
+        if (checked1 == true) {
+            status_f = "Active"
+        } else {
+            status_f = "In-Active"
+        }
+        console.log(images)
+        if (images != "") {
+            photu = "https://"+images
+        }
+        console.log(photu)
+        console.log(status_f)
+        console.log(gender_f)
+        /*if (saving == true) {
+            return
+        }*/
+        if (data.salary <= 0) {
+            Alert.alert('Enter Valid Salary!', 'Salary must be valid Integer.', [
+                { text: 'Okay' }
+            ]);
+        }
+        if (select1 == "") {
+            Alert.alert('Enter Name!', 'Department Name Field Cannot Be Empty.', [
+                { text: 'Okay' }
+            ]);
+            return
+        } else {
+            //console.log(data)
+            setSaving(true)
+            
+            try {
+
+                fetch('http://payrollv2.herokuapp.com/employee/add_empdata' + z, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fname: data.fname,
+                        mname: data.mname,
+                        gender: gender_f,
+                        dob: dateob,
+                        aadhaar: data.aadhaar,
+                        pan: data.pan,
+                        fnum: data.fnum,
+                        mnum: data.mnum,
+                        anum: data.anum,
+                        add1: data.add1,
+                        add2: data.add2,
+                        land: data.landline,
+                        salary: data.salary,
+                        bname: data.bank,
+                        ifsc: data.ifsc,
+                        accnum: data.accnum,
+                        accname: data.accname,
+                        branch: data.branch,
+                        status: status_f,
+                        name: data.name,
+                        doj: date,
+                        des: data.des,
+                        dep: select1,
+                        email: data.email,
+                        phone: data.mobile,
+                        photu: photu
+                    })
+                }).then((response) => response.json())
+                    .then((data) => {
+                        console.log(data)
+                        if(data==false){
+                            Alert.alert('No Access!', 'Ask Admin to provide you the access to add employee !.', [
+                              { text: 'Okay' }
+                            ]);
+                            setRef(false)
+                            setLoader(true)
+                            return 
+                          }
+                        setSelect1("")
+                        setSaving(false)
+                        setImages("")
+                        setImage(false)
+                        if (data.message == 'true') {
+                            setData({ ...data, name: '' })
+                            date = "01-01-2020"
+                            setChange(change + 1)
+                            Alert.alert('Success', 'Employee Added Successfully.', [
+                                { text: 'Okay', onPress: () => { navigation.navigate('EmployeeStackScreen', { refresh: true }) } }
+                            ]);
+                            return
+                        } else {
+                            Alert.alert('Some Error!', 'Try Again Some Error.', [
+                                { text: 'Okay' }
+                            ]);
+
+                            return
+                        }
+
+                    })
+
+            } catch {
+                Alert.alert('Some Error!', 'Try Again Some Error.', [
+                    { text: 'Okay' }
+                ]);
+                setSaving(false)
+                return
+
+            }
+        }
+    };
     const pickImage = async () => {
-        console.log("Gall")
+        console.log("Gallery")
         await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
@@ -142,9 +294,10 @@ const AddEmpScreen = ({ navigation }) => {
         }).then((data) => {
 
             if (!data.cancelled) {
+                setImageLoading(true)
                 setImage(data.uri);
+                console.log(data.uri)
             }
-            console.log(data.uri)
             var d = new Date()
             const file = {
                 uri: data.uri,
@@ -152,7 +305,7 @@ const AddEmpScreen = ({ navigation }) => {
                 type: 'image/jpeg'
             };
 
-            const options2 = {
+            const options = {
                 keyPrefix: "uploads/",
                 bucket: Constants.manifest.extra.bucket,
                 region: Constants.manifest.extra.region,
@@ -163,25 +316,34 @@ const AddEmpScreen = ({ navigation }) => {
                 awsUrl: Constants.manifest.extra.awsUrl
 
             };
-            const options = {
 
-            }
-
-            /*RNS3.put(file, options).then(response => {
+            RNS3.put(file, options).then(response => {
                 if (response.status !== 201) {
                     console.log(response)
+                    setImageLoading(false)
                     throw new Error('Failed to upload image to S3', response);
+                } else {
+                    console.log(response.body.postResponse.location)
+                    setImages(response.body.postResponse.location)
+                    setImageLoading(false)
                 }
-                console.log(response.body.postResponse.location)
-            });*/
+
+            });
         })
-            .catch(err => console.error(err));
+            .catch(err => {
+                setImageLoading(false)
+                Alert.alert('Some Error in Image Uploading!', 'Try Again Some Error Occured in Image Uploading.', [
+                    { text: 'Okay' }
+                ]);
+                console.error(err)
+            });
 
     };
     const [ref, setRef] = React.useState(false)
     const onRefresh = () => {
         setRef(true);
-        setTimeout(function () { setRef(false) }, 1500);
+        api1(apix)
+
 
     }
     const { colors } = useTheme();
@@ -193,13 +355,11 @@ const AddEmpScreen = ({ navigation }) => {
             id = stores[2][1];
             access = stores[3][1];
             id2 = stores[4][1];
-            if (myArray.length == 0) {
-                apix = 'https://payrollv2.herokuapp.com/department/api/dep?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-                api1(apix).then(() => { setLoader(true) })
+            apix = 'https://payrollv2.herokuapp.com/department/api/dep?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            api1(apix)
+            z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
 
-            } else {
-                setLoader(true)
-            }
+
             setLoader(true)
         })
     }, [navigation])
@@ -267,6 +427,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleNameChange(val)}
+                                value={data.name}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -321,6 +482,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleFnameChange(val)}
+                                value={data.fname}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -333,6 +495,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleFnumChange(val)}
+                                value={data.fnum}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -344,6 +507,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleMnameChange(val)}
+                                value={data.mname}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -356,6 +520,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleMnumChange(val)}
+                                value={data.mnum}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -370,6 +535,7 @@ const AddEmpScreen = ({ navigation }) => {
                                     style={{ color: colors.text }}
                                     autoCapitalize="none"
                                     onChangeText={(val) => handleMonumChange(val)}
+                                    value={data.mobile}
                                 />
                             </View>
                         </View><View style={styles.tab}>
@@ -382,6 +548,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleLnumChange(val)}
+                                value={data.landline}
                             />
                         </View>
 
@@ -395,6 +562,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleAnumChange(val)}
+                                value={data.anum}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -409,6 +577,7 @@ const AddEmpScreen = ({ navigation }) => {
                                     style={{ color: colors.text }}
                                     autoCapitalize="none"
                                     onChangeText={(val) => handleMailChange(val)}
+                                    value={data.email}
                                 />
                             </View>
 
@@ -424,6 +593,7 @@ const AddEmpScreen = ({ navigation }) => {
                                     style={{ color: colors.text }}
                                     autoCapitalize="none"
                                     onChangeText={(val) => handleAdd1Change(val)}
+                                    value={data.add1}
                                 />
                             </View>
 
@@ -437,6 +607,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleAdd2Change(val)}
+                                value={data.add2}
                             />
 
                         </View>
@@ -452,6 +623,7 @@ const AddEmpScreen = ({ navigation }) => {
                                     style={[{ color: colors.text }]}
                                     autoCapitalize="none"
                                     onChangeText={(val) => handleAadhaarChange(val)}
+                                    value={data.aadhaar}
                                 />
                             </View>
 
@@ -466,6 +638,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handlePanChange(val)}
+                                value={data.pan}
                             />
 
                         </View>
@@ -495,6 +668,7 @@ const AddEmpScreen = ({ navigation }) => {
                                     autoCapitalize="none"
                                     style={{ color: colors.text }}
                                     onChangeText={(val) => handleSalaryChange(val)}
+                                    value={data.salary}
                                 />
                             </View>
 
@@ -508,6 +682,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleDesChange(val)}
+                                value={data.des}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -601,6 +776,7 @@ const AddEmpScreen = ({ navigation }) => {
                                     style={{ color: colors.text }}
                                     autoCapitalize="none"
                                     onChangeText={(val) => handleBankChange(val)}
+                                    value={data.bank}
                                 />
                             </View>
                         </View>
@@ -613,6 +789,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleAccnameChange(val)}
+                                value={data.accname}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -624,6 +801,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleAccnumChange(val)}
+                                value={data.accnum}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -635,6 +813,7 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleIfscChange(val)}
+                                value={data.ifsc}
                             />
                         </View>
                         <View style={styles.tab}>
@@ -646,19 +825,27 @@ const AddEmpScreen = ({ navigation }) => {
                                 style={[styles.textInput, { color: colors.text }]}
                                 autoCapitalize="none"
                                 onChangeText={(val) => handleBranchChange(val)}
+                                value={data.branch}
                             />
 
                         </View>
                     </Animatable.View>
+                    {imagesloading
+                        ? <View style={{ flexDirection: "row", justifyContent: 'center' }}>
+                            <Text style={{ color: colors.text }}>
+                                Uploading Image . . . .
+                        </Text>
+                        </View> : null}
+
                     <View style={styles.button}>
                         <TouchableOpacity
                             style={[styles.signIn, {
                                 marginTop: 15
                             }]}
-                            onPress={() => { console.log("SAVED"); setSaving(true); console.log(data) }}
+                            onPress={() => { console.log("SAVED"); save() }}
                         >
                             <LinearGradient
-                                colors={['#d42424', '#96358d']}
+                                colors={['#26853e', '#2f633c']}
                                 style={styles.signIn}
                                 start={[-1, 0]}
                                 end={[1, 0]}
@@ -673,7 +860,7 @@ const AddEmpScreen = ({ navigation }) => {
                             </LinearGradient>
                         </TouchableOpacity>
                     </View>
-                    <View>
+                    <View style={{ height: height * 0.1 }}>
                         <Text>
 
                         </Text>
@@ -764,11 +951,11 @@ const styles = StyleSheet.create({
         width: "40%"
 
     }, signIn: {
-        width: '60%',
+        width: '80%',
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 40,
+        borderRadius: 20,
         flexDirection: 'row',
 
     }, button: {

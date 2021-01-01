@@ -1,13 +1,10 @@
 import React from 'react';
-import { View, Text, TextInput, ScrollView, StyleSheet, ActivityIndicator, Dimensions, RefreshControl, } from 'react-native';
+import { Alert, View, Text, TextInput, ScrollView, StyleSheet, ActivityIndicator, Dimensions, RefreshControl, } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox, Avatar, } from 'react-native-paper';
+import Constants from 'expo-constants';
 import { RNS3 } from 'react-native-aws3';
-
-import Ripple from 'react-native-material-ripple';
-import { SinglePickerMaterialDialog } from 'react-native-material-dialog';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AsyncStorage from '@react-native-community/async-storage';
@@ -23,18 +20,22 @@ var whichdate = -1
 var myArray = {
 }
 var myArray2 = {
-
 }
 
 var symbol = ''
 var emp_id = 0
-
+var z = ""
+var api = ""
+var api2 = ""
 
 const EditEmpScreen = (props, { route, navigation }) => {
     const { colors } = useTheme();
     navigation = props.navigation
     const [edit, setEdit] = React.useState(false)
     const [loader, setLoader] = React.useState(false)
+    const [images, setImages] = React.useState("")
+    const [imagesloading, setImageLoading] = React.useState(false)
+    const [change, setChange] = React.useState(0);
     const [image, setImage] = React.useState(null);
     const [saving, setSaving] = React.useState(false)
     const [checked1, setChecked1] = React.useState(true);
@@ -43,7 +44,6 @@ const EditEmpScreen = (props, { route, navigation }) => {
     const [visible1, setVisible1] = React.useState(false)
     const [gender, setGender] = React.useState("")
     const [status, setStatus] = React.useState("")
-    const [count, setCount] = React.useState(0)
     const [isDatePickerVisible, setDatePickerVisibility] = React.useState(false);
 
     const showDatePicker = (a) => {
@@ -51,42 +51,54 @@ const EditEmpScreen = (props, { route, navigation }) => {
         setDatePickerVisibility(true);
     };
     const api1 = async (api, api2) => {
-        try {
-            const response = await fetch(api);
-            const responseJson = await response.json();
-            myArray = responseJson;
-            setData(responseJson);
-            try {
-                const response2 = await fetch(api2);
-                const ResponseJson2 = await response2.json();
-                myArray2 = ResponseJson2[0];
-                setData2(ResponseJson2[0]);
-                symbol = ResponseJson2[1];
-                setTimeout(() => {
-                    setStatus(data.status)
-                    setGender(data2.gender)
-                    console.log(data2.gender)
-                    console.log(data.status)
-                    if (data2.gender == 'Male') {
-                        setChecked2(true)
-                    } else {
-                        setChecked2(false)
-                    }
-                    if (data.status == "Active") {
-                        setChecked1(true)
-                    } else {
-                        setChecked1(false)
-                    }
-                }, 1500)
+        console.log("called")
+        setLoader(false)
+        return fetch(api)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                myArray = responseJson;
+                setData(responseJson);
+                return fetch(api2)
+                    .then((response) => response.json())
+                    .then((responseJson2) => {
+                        myArray2 = responseJson2[0];
+                        setData2(responseJson2[0]);
+                        setStatus(responseJson.status)
+                        setGender(responseJson2[0].gender)
 
-            } catch (error) {
-                console.error(error);
-                return await Promise.reject(false);
-            }
-        } catch (error_1) {
-            console.error(error_1);
-            return await Promise.reject(false);
-        }
+                        if (responseJson2[0].gender == 'Male') {
+                            setChecked2(true)
+                        } else {
+                            setChecked2(false)
+                        }
+                        if (responseJson.status == "Active") {
+                            setChecked1(true)
+                        } else {
+                            setChecked1(false)
+                        }
+                        setLoader(true)
+                        setRef(false)
+                    })
+                    .catch((error) => {
+                        Alert.alert('Some Error!', 'Try Again Some Error.' + error, [
+                            { text: 'Okay' }
+                        ]);
+                        setLoader(true)
+                        setRef(false)
+                        return
+                    });
+            })
+            .catch((error) => {
+                Alert.alert('Some Error!', 'Try Again Some Error.' + error, [
+                    { text: 'Okay' }
+                ]);
+                setLoader(true)
+                setRef(false)
+                return
+            });
+
+
+
 
     };
 
@@ -116,7 +128,6 @@ const EditEmpScreen = (props, { route, navigation }) => {
     const handleAadhaarChange = (val) => { setData2({ ...data2, aadhaar: val }) }
     const handleConfirm = (dat) => {
         console.log("A date has been picked: ", dat);
-        console.log(whichdate)
         if (whichdate == 0) {
             setData2({ ...data2, dob: dat.getDate() + "-" + (dat.getMonth() + 1) + "-" + dat.getFullYear() })
         } else {
@@ -127,27 +138,26 @@ const EditEmpScreen = (props, { route, navigation }) => {
         hideDatePicker();
     };
     const pickImage = async () => {
-        console.log("Gall")
+        console.log("Gallery Opened")
         await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
-        }).then((data) => {
+        }).then((datax) => {
 
-            if (!data.cancelled) {
-                setImage(data.uri);
+            if (!datax.cancelled) {
+                setImage(datax.uri);
             }
-            console.log(data.uri)
-            setData({ ...data, photo: data.uri })
+            setData({ ...data, photo: datax.uri })
             var d = new Date()
             const file = {
-                uri: data.uri,
+                uri: datax.uri,
                 name: 'photo' + d.getTime() + '.jpg',
                 type: 'image/jpeg'
             };
 
-            const options2 = {
+            const options = {
                 keyPrefix: "uploads/",
                 bucket: Constants.manifest.extra.bucket,
                 region: Constants.manifest.extra.region,
@@ -158,19 +168,28 @@ const EditEmpScreen = (props, { route, navigation }) => {
                 awsUrl: Constants.manifest.extra.awsUrl
 
             };
-            const options = {
 
-            }
-
-            /*RNS3.put(file, options).then(response => {
+            RNS3.put(file, options).then(response => {
                 if (response.status !== 201) {
-                    console.log(response)
-                    throw new Error('Failed to upload image to S3', response);
+                    setImageLoading(false)
+                    Alert.alert('Some Error in Image Uploading!', 'Try Again Some Error Occured in Image Uploading.' + response, [
+                        { text: 'Okay' }
+                    ]);
+                    return
+                } else {
+                    console.log(response.body.postResponse.location)
+                    setImages(response.body.postResponse.location)
+                    setImageLoading(false)
                 }
-                console.log(response.body.postResponse.location)
-            });*/
+            });
         })
-            .catch(err => console.error(err));
+            .catch(err => {
+                setImageLoading(false)
+                Alert.alert('Some Error in Image Uploading!', 'Try Again Some Error Occured in Image Uploading.', [
+                    { text: 'Okay' }
+                ]);
+                console.error(err)
+            });
 
     };
     const [data, setData] = React.useState({})
@@ -178,10 +197,13 @@ const EditEmpScreen = (props, { route, navigation }) => {
     const [ref, setRef] = React.useState(false)
     const onRefresh = () => {
         setRef(true);
-        setTimeout(function () { setRef(false) }, 1500);
+        api1(api, api2)
 
     }
     emp_id = props.empid
+    React.useEffect(() => {
+
+    }, [change])
     React.useEffect(() => {
         AsyncStorage.multiGet(keys, async (err, stores) => {
             setLoader(false)
@@ -191,10 +213,11 @@ const EditEmpScreen = (props, { route, navigation }) => {
             var id = stores[2][1];
             var access = stores[3][1];
             var id2 = stores[4][1];
-            var api = 'https://payrollv2.herokuapp.com/employee/api/quickemp?empid=' + emp_id + "&id=" + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-            var api2 = 'https://payrollv2.herokuapp.com/employee/api/emp?empid=' + emp_id + "&id=" + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access)
-            console.log(api2)
-            await api1(api, api2).then(() => { setLoader(true) })
+            api = 'https://payrollv2.herokuapp.com/employee/api/quickemp?empid=' + emp_id + "&id=" + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            api2 = 'https://payrollv2.herokuapp.com/employee/api/emp?empid=' + emp_id + "&id=" + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access)
+
+            z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            api1(api, api2)
 
             //setLoader(true)
 
@@ -202,12 +225,175 @@ const EditEmpScreen = (props, { route, navigation }) => {
 
         })
     }, [navigation, props])
+    const changestatus = async (xx) => {
+        console.log("Changing Status")
+        try {
+
+            fetch('https://payrollv2.herokuapp.com/employee/api/active?empid=' + emp_id + z, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    emp_id: data.emp_id,
+                    status: xx,
+                })
+            }).then((response) => response.json())
+                .then((data) => {
+                    if (data.message == 'true') {
+
+                        return
+                    } else {
+                        Alert.alert('Some Error!', 'Try Again Some Error.', [
+                            { text: 'Okay' }
+                        ]);
+                        return
+                    }
+
+                })
+
+        } catch {
+            Alert.alert('Some Error!', 'Try Again Some Error.', [
+                { text: 'Okay' }
+            ]);
+            return
+
+        }
+
+    };
+    const save = async () => {
+
+        if (imagesloading == true) {
+            Alert.alert('Image Uploading !', 'Try Again after Image Upload is Done.', [
+                { text: 'Okay' }
+            ]);
+            return
+        }
+
+
+        var gender_f = ""
+        var status_f = ""
+        var photu = ""
+        if (checked2 == true) {
+            gender_f = "Male"
+        } else {
+            gender_f = "Female"
+        }
+        if (saving == true) {
+            return
+        }
+        if (checked1 == true) {
+            status_f = "Active"
+        } else {
+            status_f = "In-Active"
+        }
+        if (data.status != status_f) {
+            changestatus(status_f)
+        }
+        if (images != "") {
+            photu = "https://" + images
+        } else {
+            photu = data.photo
+        }
+
+        if (data.salary <= 0) {
+            Alert.alert('Enter Valid Salary!', 'Salary must be valid Integer.', [
+                { text: 'Okay' }
+            ]);
+        } else {
+            setLoader(false)
+            setSaving(true)
+            try {
+
+                fetch('https://payrollv2.herokuapp.com/employee/edit_empdata?empid=' + emp_id + z, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        empid: data.emp_id,
+                        fname: data2.fname,
+                        mname: data2.mname,
+                        gender: gender_f,
+                        dob: data2.dob,
+                        aadhaar: data2.aadhaar,
+                        pan: data2.pan,
+                        fnum: data2.fnum,
+                        mnum: data2.mnum,
+                        anum: data2.anum,
+                        add1: data2.add1,
+                        add2: data2.add2,
+                        land: data2.land,
+                        salary: data.salary,
+                        bname: data2.bname,
+                        ifsc: data2.ifsc,
+                        accnum: data2.accnum,
+                        accname: data2.accname,
+                        branch: data2.branch,
+                        status: status_f,
+                        name: data.name,
+                        doj: data.doj,
+                        des: data.des,
+                        dep: data.dep,
+                        email: data.email,
+                        phone: data.pnum,
+                        photo: photu,
+                        doc1: data2.doc1,
+                        doc2: data2.doc2,
+                        doc3: data2.doc3,
+                        doc4: data2.doc4,
+                        doc5: data2.doc5,
+                    })
+                }).then((response) => response.json())
+                    .then((data) => {
+                        console.log(data)
+                        if(data==false){
+                            Alert.alert('No Access!', 'Ask Admin to provide you the access to edit this page !.', [
+                              { text: 'Okay' }
+                            ]);
+                            setRef(false)
+                            setLoader(true)
+                            setSaving(false)
+                            return 
+                          }
+                        setSaving(false)
+                        setImages("")
+                        setImage(false)
+                        setLoader(true)
+                        if (data.message == 'true') {
+                            setChange(change + 1)
+                            Alert.alert('Success', 'Employee Edited Successfully.', [
+                                { text: 'Okay', }
+                            ]);
+                            return
+                        } else {
+                            Alert.alert('Some Error!', 'Try Again Some Error.', [
+                                { text: 'Okay' }
+                            ]);
+                            return
+                        }
+
+                    })
+
+            } catch {
+                Alert.alert('Some Error!', 'Try Again Some Error.', [
+                    { text: 'Okay' }
+                ]);
+                setSaving(false)
+                setLoader(true)
+                return
+
+            }
+        }
+    };
     return (
         <View style={styles.container}>
             {edit ? <View style={styles.touchableOpacityStyle}>
                 <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => { setEdit(!edit) }}>
+                    onPress={() => { setEdit(!edit); save() }}>
                     <FontAwesome name="floppy-o" size={25} backgroundColor="green" color="white" />
 
                 </TouchableOpacity>
@@ -275,7 +461,7 @@ const EditEmpScreen = (props, { route, navigation }) => {
                                         status={checked2 ? 'checked' : 'unchecked'}
                                         onPress={() => {
                                             setChecked2(!checked2);
-                                            setGender(checked2 ? 'Female' : 'Male')
+                                            setGender(!checked2 ? 'Female' : 'Male')
                                         }}
                                         color={'green'}
                                     />
@@ -290,7 +476,7 @@ const EditEmpScreen = (props, { route, navigation }) => {
                                         status={!checked2 ? 'checked' : 'unchecked'}
                                         onPress={() => {
                                             setChecked2(!checked2);
-                                            setGender(checked2 ? 'Female' : 'Male')
+                                            setGender(!checked2 ? 'Female' : 'Male')
                                         }}
                                         color={'green'}
                                     />
@@ -647,6 +833,12 @@ const EditEmpScreen = (props, { route, navigation }) => {
                                 />
 
                             </View>
+                            {imagesloading
+                                ? <View style={{ flexDirection: "row", justifyContent: 'center' }}>
+                                    <Text style={{ color: colors.text }}>
+                                        Uploading Image . . . .
+                        </Text>
+                                </View> : null}
                         </Animatable.View>
                     </View> :
                         <View style={{ marginTop: "0%" }}>
@@ -717,6 +909,14 @@ const EditEmpScreen = (props, { route, navigation }) => {
                                             </Text>
                                     <Text style={[styles.val, { color: colors.text }]}>
                                         {data2.mnum}
+                                    </Text>
+                                </View>
+                                <View style={styles.tab}>
+                                    <Text style={[styles.heading, { color: colors.text }]}>
+                                        Mobile Number
+                                            </Text>
+                                    <Text style={[styles.val, { color: colors.text }]}>
+                                        {data.pnum}
                                     </Text>
                                 </View>
                                 <View style={styles.tab}>

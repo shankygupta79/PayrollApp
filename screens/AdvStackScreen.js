@@ -66,6 +66,7 @@ const AdvScreen = ({ navigation }) => {
     try {
       const response = await fetch(api);
       const responseJson = await response.json();
+      
       myArray = [];
       idx = []
       for (var i = 0; i < responseJson.length; i++) {
@@ -99,6 +100,15 @@ const AdvScreen = ({ navigation }) => {
 
       const response2 = await fetch(ap2);
       adv = await response2.json();
+      if(adv==false){
+        Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+          { text: 'Okay' }
+        ]);
+        setRef(false)
+        setSaving(false)
+        setLoader(true)
+        return
+    }
       adv.reverse();
       for (var i = 0; i < adv.length; i++) {
         if (adv[i].type == 0) {

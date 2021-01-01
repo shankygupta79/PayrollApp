@@ -14,6 +14,7 @@ import BottomNav from './BottomNav.js';
 const Stack = createStackNavigator();
 var myArray = []
 var api = ""
+var z = ""
 var sortfield = "Date"
 var map = ['Name', 'Employee Count']
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
@@ -21,6 +22,8 @@ const DepScreen = ({ route, navigation }) => {
     const { colors } = useTheme();
     const [loader, setLoader] = React.useState(false)
     const [select1, setSelect1] = React.useState("None")
+
+    const [change, setChange] = React.useState(0);
     const [visible1, setVisible1] = React.useState(false)
     const [ref, setRef] = React.useState(false)
     const onRefresh = () => {
@@ -35,7 +38,6 @@ const DepScreen = ({ route, navigation }) => {
     const sort = (key) => {
         console.log(key)
         sortfield = key
-        console.log(key)
         if (key == 'Name') {
             sortfield = "dep"
         } else if (key == "Employee Count") {
@@ -53,22 +55,82 @@ const DepScreen = ({ route, navigation }) => {
     }
 
     const api1 = async (api) => {
-        try {
-            const response = await fetch(api);
-            const responseJson = await response.json();
-            myArray = responseJson
-            console.log(myArray)
-            sort('Name')
-        } catch (error) {
-            console.error(error);
-            return await Promise.reject(false);
-        }
+        setLoader(false)
+        fetch(api)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                if(responseJson==false){
+                    Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                      { text: 'Okay' }
+                    ]);
+                    setRef(false)
+                    setLoader(true)
+                    return 
+                  }
+                myArray = responseJson
+                console.log("Loaded")
+                sort('Name')
+                setChange(change + 1)
+                setLoader(true)
+            }).catch((error) => {
+                console.error(error);
+                Alert.alert('Error Occured!', 'Some Error Occured.' + error, [
+                    { text: 'Okay' }
+                ]);
+                setLoader(true)
+                return
+            })
 
     }
-    const deletefun = () => {
+    const deleteit = (obj) => {
+        if (loader == false) {
+
+            return
+        }
+        setLoader(false)
+        try {
+            fetch('http://payrollv2.herokuapp.com/department/delete?idx='+ obj.dep+ z, {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                idx: obj.dep,
+              })
+            }).then((response) => response.json())
+              .then((data) => {
+                setLoader(true)
+                if (data.message == 'true') {
+                  setChange(change+1)
+                  Alert.alert('Success', 'Department Deleted Successfully.', [
+                    { text: 'Okay', onPress: () => { onRefresh() } }
+                  ]);
+                  return
+                } else {
+                  Alert.alert('Some Error!', 'Try Again Some Error.', [
+                    { text: 'Okay' }
+                  ]);
+                  setLoader(true)
+                  return
+                }
+    
+              })
+    
+          } catch {
+            Alert.alert('Some Error!', 'Try Again Some Error.', [
+              { text: 'Okay' }
+            ]);
+            setLoader(true)
+            return
+    
+          }
+
+    }
+    const deletefun = (obj) => {
         Alert.alert('Delete Dep !', 'Are you sure to selete the Dep ?', [
             { text: 'Cancel' },
-            { text: 'Okay', onPress: () => console.log("OK Pressed") }
+            { text: 'Okay', onPress: () => { deleteit(obj) } }
 
         ]);
     }
@@ -81,17 +143,17 @@ const DepScreen = ({ route, navigation }) => {
             var id = stores[2][1];
             var access = stores[3][1];
             var id2 = stores[4][1];
-            if (myArray.length == 0) {
-                api = 'https://payrollv2.herokuapp.com/department/api/dep2?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
-                await api1(api).then(() => { setLoader(true) })
-            } else {
-                setLoader(true)
-            }
+            z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            api = 'https://payrollv2.herokuapp.com/department/api/dep2?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
+            api1(api)
+
 
 
 
         })
     }, [navigation,])
+    React.useEffect(() => {
+    }, [change])
     return (
 
         <View style={styles.container}>
@@ -171,13 +233,13 @@ const DepScreen = ({ route, navigation }) => {
                             )
                         })
                     }
-                    <View style={{ margin: '3%',padding:2, flexDirection: 'row', backgroundColor: "#61b55e", borderRadius: 10, alignItems: 'center' }}>
+                    <View style={{ margin: '3%', padding: 2, flexDirection: 'row', backgroundColor: "#61b55e", borderRadius: 10, alignItems: 'center' }}>
                         <Text>
                             {"  "}
                         </Text>
                         <FontAwesome name="exclamation-triangle" size={25} style={[{ backgroundColor: colors.backgroundColor, color: colors.text, }]} onPress={() => deletefun(item)} />
 
-                        <Text style={{color:colors.text,fontSize:12,marginRight:'7%',marginLeft:'3%'}}>
+                        <Text style={{ color: colors.text, fontSize: 12, marginRight: '7%', marginLeft: '3%' }}>
                             Newly Added Department will be shown if you add atleast one employee in it ! !
                         </Text>
                     </View>
@@ -240,7 +302,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         padding: 10,
-        marginTop: "0%",
+        marginTop: "50%",
     }, blck: {
         padding: "2%",
         margin: '0.5%',

@@ -26,7 +26,7 @@ var off = "";
 var id = "";
 var access = "";
 var id2 = "";
-var apix = ""
+var api = ""
 var list = []
 const Payslipscreen = ({ route, navigation }) => {
     const { colors } = useTheme();
@@ -40,6 +40,11 @@ const Payslipscreen = ({ route, navigation }) => {
     const [visible3, setVisible3] = React.useState(false)
     const [ref, setRef] = React.useState(false)
     const [data, setData] = React.useState(false)
+    const download = () =>{
+        Alert.alert('Use Web Version!', 'Sorry! This Feature is not available in app! Visit www.payrollv2.herokuapp.com.', [
+            { text: 'Okay' }
+        ]);
+    }
     const view = async () => {
         if (saving == true) {
             return
@@ -49,33 +54,45 @@ const Payslipscreen = ({ route, navigation }) => {
 
         var z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
         var ap1 = 'https://payrollv2.herokuapp.com/payslips/api/data?date=' + arr[monthlist.indexOf(select2)] + select3 + z
-        try {
-            const response = await fetch(ap1);
-            list = await response.json();
-            myArray = []
-            if (response.length == 0) {
-                Alert.alert('No Record!', 'No Record Found.', [
+        return fetch(ap1)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                if(responseJson==false){
+                    Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                      { text: 'Okay' }
+                    ]);
+                    setRef(false)
+                    setSaving(false)
+                    setLoader(true)
+                    return
+                }
+                list = responseJson
+                myArray = []
+                if (list.length == 0) {
+                    Alert.alert('No Record!', 'No Record Found.', [
+                        { text: 'Okay' }
+                    ]);
+                    setSaving(false)
+                    setRef(false)
+                    return
+
+                }
+
+                for (var i = 0; i < list.length; i++) {
+                    myArray.push({ name: list[i]['employee_quick'].name, netpay: list[i].netpay })
+                }
+                sort('Name')
+                setSaving(false)
+                setData(true)
+                setRef(false)
+            }).catch(error => {
+                console.error(error);
+                Alert.alert('Some Error Occured!', 'Error is .' + error, [
                     { text: 'Okay' }
                 ]);
                 setSaving(false)
-                return
-
-            }
-
-            for (var i = 0; i < list.length; i++) {
-                myArray.push({ name: list[i]['employee_quick'].name, netpay: list[i].netpay })
-            }
-            sort('Name')
-            setSaving(false)
-            setData(true)
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Some Error Occured!', 'Error is .' + error, [
-                { text: 'Okay' }
-            ]);
-            setSaving(false)
-            return await Promise.reject(false);
-        }
+                return;
+            })
         setSaving(false)
 
     }
@@ -85,8 +102,7 @@ const Payslipscreen = ({ route, navigation }) => {
             return
         }
         setRef(true);
-        api1(api)
-        setTimeout(function () { setRef(false) }, 1500);
+        view()
 
     }
     const sort = (key) => {
@@ -152,7 +168,6 @@ const Payslipscreen = ({ route, navigation }) => {
             id = stores[2][1];
             access = stores[3][1];
             id2 = stores[4][1];
-            view()
             year()
             setLoader(true)
 
@@ -289,7 +304,7 @@ const Payslipscreen = ({ route, navigation }) => {
                                                 {" ₹ "} {item.netpay}
                                             </Text>
                                             <View style={[styles.text, { color: colors.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: width * 0.2 }]}>
-                                                <FontAwesome name="download" style={[styles.but, { backgroundColor: 'green' }]} size={25} onPress={() => { }} />
+                                                <FontAwesome name="download" style={[styles.but, { backgroundColor: 'green' }]} size={25} onPress={() => { download()}} />
                                                 <FontAwesome name="print" size={25} style={[styles.but, { backgroundColor: 'red' }]} onPress={() => { }} />
                                             </View>
 

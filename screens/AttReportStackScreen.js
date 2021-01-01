@@ -55,6 +55,15 @@ const AttReportScreen = ( { route, navigation }) => {
     try {
       const response = await fetch(api);
       const responseJson = await response.json();
+      if(responseJson==false){
+        Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+          { text: 'Okay' }
+        ]); 
+        setRef(false)
+        setSaving(false)
+        setLoader(true)
+        return
+    }
       myArray = ["All Employee"];
       idx = [-1]
       for (var i = 0; i < responseJson.length; i++) {
@@ -90,6 +99,15 @@ const AttReportScreen = ( { route, navigation }) => {
     try {
       const response = await fetch(ap1);
       list = await response.json();
+      if(list==false){
+        Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+          { text: 'Okay' }
+        ]); 
+        setRef(false)
+        setSaving(false)
+        setLoader(true)
+        return
+    }
 
       if (response.length == 0) {
         Alert.alert('No Record!', 'No Record Found.', [

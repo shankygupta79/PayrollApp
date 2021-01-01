@@ -13,7 +13,6 @@ import BottomNav from './BottomNav';
 const { width, height } = Dimensions.get("screen");
 const Stack = createStackNavigator();
 var keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
-var myArray = []
 var monthlist = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 var arr = ['01-', '02-', '03-', '04-', '05-', '06-', '07-', '08-', '09-', '10-', '11-', '12-'];
 var yearlist = []
@@ -25,6 +24,7 @@ var access = "";
 var id2 = "";
 var apix = ""
 var list = []
+var z = ""
 
 
 const CalcScreen = ({ navigation }) => {
@@ -35,6 +35,7 @@ const CalcScreen = ({ navigation }) => {
   const [visible2, setVisible2] = React.useState(false)
   const [select3, setSelect3] = React.useState("")
   const [visible3, setVisible3] = React.useState(false)
+  const [change, setChange] = React.useState(0);
   const [saving, setSaving] = React.useState(false)
   const [saving2, setSaving2] = React.useState(false)
   const [savebutton, setSaveButton] = React.useState("Edit")
@@ -60,18 +61,68 @@ const CalcScreen = ({ navigation }) => {
   }
   const onRefresh = () => {
     setRef(true);
-    api1(apix);
-    setTimeout(function () { setRef(false) }, 1500);
+    view()
 
   }
-  const save = () =>{
-    if(edit==false){
+  const save = () => {
+    if (edit == false) {
       setEdit(true)
       setSaveButton("Save")
-    }else{
+    } else {
+      setSaving2(true)
       setEdit(false)
-      setSaving2(false)
-      setSaveButton("Edit")
+      try {
+
+        fetch('http://payrollv2.herokuapp.com/payslips/api/calc' + z, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            list: list,
+            x: list[0].monthyear,
+          })
+        }).then((response) => response.json())
+          .then((data) => {
+            console.log(data)
+            setSaving2(false)
+            if(data==false){
+              Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+                { text: 'Okay' }
+              ]);
+              setRef(false)
+              setLoader(true)
+              return 
+            }
+            if (data.message == 'true') {
+              setSaveButton("Edit")
+              
+              setChange(change + 1)
+              Alert.alert('Success !', 'Monthly Salary Calculation Saved.', [
+                { text: 'Okay', onPress: () => { navigation.navigate('PayslipsStackScreen', { refresh: true }) } }
+              ]);
+              return
+            } else {
+              Alert.alert('Some Error!', 'Try Again Some Error.', [
+                { text: 'Okay' }
+              ]);
+
+              return
+            }
+
+          })
+
+      } catch {
+        Alert.alert('Some Error!', 'Try Again Some Error.', [
+          { text: 'Okay' }
+        ]);
+        setSaving(false)
+
+        setSaveButton("Edit")
+        return
+
+      }
     }
   }
   const year = () => {
@@ -87,53 +138,73 @@ const CalcScreen = ({ navigation }) => {
   }
 
   const view = async () => {
-    setData(false)
+
     if (saving == true) {
       return
     }
-
+    setData(false)
+    setLoader(false)
+    setSaving(true)
     var z = '&id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
     var ap1 = 'https://payrollv2.herokuapp.com/payslips/api/data?date=' + arr[monthlist.indexOf(select2)] + select3 + z
-    try {
-      const response = await fetch(ap1);
-      list = await response.json();
-      if (response.length == 0) {
-        Alert.alert('No Record!', 'No Record Found.', [
+    console.log("Data called")
+    return fetch(ap1)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        if(responseJson==false){
+          Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
+            { text: 'Okay' }
+          ]);
+          setRef(false)
+          setSaving(false)
+          setLoader(true)
+          return 
+        }
+        list = responseJson
+        if (list.length == 0) {
+          Alert.alert('No Record!', 'No Record Found.', [
+            { text: 'Okay' }
+          ]);
+          setSaving(false)
+          setLoader(true)
+          setRef(false)
+          return
+
+        }
+        var days = monthday[monthlist.indexOf(select2)]
+
+
+        for (var i = 0; i < list.length; i++) {
+          list[i].emiold = list[i].emi;
+          var extrarr = list[i].extratime.split(';')
+          var prearr = list[i].present
+          var extra = 0
+          var ab = 0
+          for (var j = 0; j < days; j++) {
+            extra = extra + parseInt(extrarr[j])
+            if (prearr[j] == 'A') {
+              ab++
+            }
+          }
+          list[i].extratimetotoal = extra
+          list[i].holidays = Math.round((list[i]['employee_quick'].salary / days) * ab)
+        }
+
+        setSaving(false)
+        setLoader(true)
+        setData(true)
+        setRef(false)
+      }).catch(error => {
+        console.error(error);
+        Alert.alert('Some Error Occured!', 'Error is .' + error, [
           { text: 'Okay' }
         ]);
         setSaving(false)
+        setLoader(true)
+        setData(true)
+        setRef(false)
         return
-
-      }
-      var days = monthday[monthlist.indexOf(select2)]
-
-
-      for (var i = 0; i < list.length; i++) {
-        list[i].emiold = list[i].emi;
-        var extrarr = list[i].extratime.split(';')
-        var prearr = list[i].present
-        var extra = 0
-        var ab = 0
-        for (var j = 0; j < days; j++) {
-          extra = extra + parseInt(extrarr[j])
-          if (prearr[j] == 'A') {
-            ab++
-          }
-        }
-        list[i].extratimetotoal = extra
-        list[i].holidays = Math.round((list[i]['employee_quick'].salary / days) * ab)
-      }
-
-      setData(true)
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Some Error Occured!', 'Error is .' + error, [
-        { text: 'Okay' }
-      ]);
-      setSaving(false)
-      return await Promise.reject(false);
-    }
-    setSaving(false)
+      })
   }
 
   React.useEffect(() => {
@@ -144,7 +215,7 @@ const CalcScreen = ({ navigation }) => {
       id = stores[2][1];
       access = stores[3][1];
       id2 = stores[4][1];
-
+      z = '?id=' + encodeURIComponent(id) + '&platform=APP&admin=' + encodeURIComponent(admin) + '&id2=' + encodeURIComponent(id2) + "&off=" + encodeURIComponent(off) + "&access=" + encodeURIComponent(access);
       year()
       setLoader(true)
 
@@ -157,7 +228,7 @@ const CalcScreen = ({ navigation }) => {
         <TouchableOpacity
           activeOpacity={0.7}
           style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
-          onPress={() => {navigation.navigate('PayslipsStackScreen')}}>
+          onPress={() => { navigation.navigate('PayslipsStackScreen') }}>
           <FontAwesome name="download" size={20} backgroundColor="magenta" color="white" />
 
         </TouchableOpacity>
@@ -194,7 +265,7 @@ const CalcScreen = ({ navigation }) => {
           <View style={styles.button}>
 
             <TouchableOpacity
-              onPress={() => { console.log("CLICKED"); setSaving(true); view() }} >
+              onPress={() => { console.log("CLICKED"); view() }} >
               <LinearGradient
                 colors={['#e774ed', '#eb38cd', '#e774ed']}
                 style={styles.signIn}
@@ -410,21 +481,21 @@ const CalcScreen = ({ navigation }) => {
                   </View>
                 </View>)
               })}
-<View style={styles.button}>
-            <TouchableOpacity
-              onPress={() => { console.log("CLICKED"); save() }} >
-              <LinearGradient
-                colors={['#e774ed', '#eb38cd', '#e774ed']}
-                style={[styles.signIn,{width:width*0.8}]}
-                start={[-1, 0]}
-                end={[1, 0]}
-              >
+            <View style={styles.button}>
+              <TouchableOpacity
+                onPress={() => { console.log("CLICKED"); save() }} >
+                <LinearGradient
+                  colors={['#e774ed', '#eb38cd', '#e774ed']}
+                  style={[styles.signIn, { width: width * 0.8 }]}
+                  start={[-1, 0]}
+                  end={[1, 0]}
+                >
 
-                <Text style={[styles.textSign, { color: '#fffff0', fontWeight: "bold" }]}>
-                  {savebutton} </Text>
-                {saving2 ? <ActivityIndicator style={{ marginLeft: "5%" }} size="small" color="#fffff0" /> : null}
-              </LinearGradient>
-            </TouchableOpacity></View>
+                  <Text style={[styles.textSign, { color: '#fffff0', fontWeight: "bold" }]}>
+                    {savebutton} </Text>
+                  {saving2 ? <ActivityIndicator style={{ marginLeft: "5%" }} size="small" color="#fffff0" /> : null}
+                </LinearGradient>
+              </TouchableOpacity></View>
 
 
 
