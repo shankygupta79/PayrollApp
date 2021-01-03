@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { useTheme } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import BottomNav from './BottomNav.js';
-var z=""
+var z = ""
 const Stack = createStackNavigator();
 var selectedDate = '2018-01-01'
 var dx = 0
@@ -18,10 +18,10 @@ var x = '2018-01'
 var admin = '';
 var off = '';
 var id = '';
-var api=""
+var api = ""
 var access = '';
 var id2 = '';
-var dxt=""
+var dxt = ""
 const { width, height } = Dimensions.get("screen");
 const keys = ['admin', 'office_close', 'userToken', 'access', 'userToken2']
 const AttendanceScreen = ({ navigation }) => {
@@ -49,7 +49,7 @@ const AttendanceScreen = ({ navigation }) => {
     var yeaar = selectedDate.getFullYear();
     dx = parseInt(selectedDate.getDate())
     x = mon + "-" + yeaar;
-    if(off[(selectedDate.getDay()-1+7)%7]=="1"){
+    if (off[(selectedDate.getDay() - 1 + 7) % 7] == "1") {
       Alert.alert('Today is Holiday !', 'Enjoy The Day !.', [
         { text: 'Okay' }
       ]);
@@ -72,7 +72,7 @@ const AttendanceScreen = ({ navigation }) => {
           setLoader(true)
           return
         }
-        
+
         if (responseJson == '5') {
           Alert.alert('Chart for this Month Created!', 'Reload to mark Attendance !', [
             { text: 'Okay' }
@@ -87,8 +87,9 @@ const AttendanceScreen = ({ navigation }) => {
           for (var i = 0; i < responseJson.length; i++) {
             var temp = '';
             var tpr = '';
-            var temparray = responseJson[i].extratime.slice(';')
-            temp = temparray[(dx - 1) * 2]
+            var temparray = Response1[i].extratime.split(';')
+            //console.log(temparray)
+            temp = temparray[(log.dx - 1)]
             var st = responseJson[i].present[dx - 1]
             if (st == '-') {
               tpr = "none"
@@ -134,20 +135,19 @@ const AttendanceScreen = ({ navigation }) => {
     return new Promise((resolve, reject) => {
       console.log(j)
       var y = '';
-      for (var i = 0; i < 61; i++) {
-        if (i == 2 * (dx - 1)) {
-          y = y + myArray[j].etb
-        } else {
-          y = y + myArray[j].etbarr[i];
-        }
+      var y = '';
+      myArray[j].etbarr[dx - 1] = myArray[j].etb
+      //console.log(log.myArray[j].etbarr)
+      for (var i = 0; i < 31; i++) {
+        y = y + myArray[j].etbarr[i] + ";"
       }
       var tp = myArray[j].presentarr
       var tp2 = myArray[j].marked
       if (myArray[j].status == "none") {
         myArray[j].status = "-";
-      }else if(myArray[j].status==true){
+      } else if (myArray[j].status == true) {
         myArray[j].status = "Present";
-      }else{
+      } else {
         myArray[j].status = "Absent";
       }
       console.log(myArray[j].status)
@@ -155,7 +155,7 @@ const AttendanceScreen = ({ navigation }) => {
         reject("P")
       }
       tp = tp.substring(0, dx - 1) + myArray[j].status[0] + tp.substring(dx);
-      
+
       tp2 = tp2.substring(0, dx - 1) + "1" + tp2.substring(dx);
 
       var abc = '';
@@ -192,9 +192,9 @@ const AttendanceScreen = ({ navigation }) => {
             }
             if (myArray[j].status == "-") {
               myArray[j].status = "none";
-            }else if(myArray[j].status=="Present"){
+            } else if (myArray[j].status == "Present") {
               myArray[j].status = true;
-            }else{
+            } else {
               myArray[j].status = false;
             }
             if (data.message != 'true') {
@@ -219,12 +219,12 @@ const AttendanceScreen = ({ navigation }) => {
     for (var i = 0; i < myArray.length; i++) {
       var a = await attendance(i);
       console.log(a)
-      if(a=="Z"){
+      if (a == "Z") {
         break
       }
 
     }
-    Alert.alert('Attendance Marked', 'Attendance Marked for '+selectedDate, [
+    Alert.alert('Attendance Marked', 'Attendance Marked for ' + selectedDate, [
       { text: 'Okay' }
     ]);
     setSaving(false)
