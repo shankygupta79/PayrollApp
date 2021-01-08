@@ -135,7 +135,6 @@ const AttendanceScreen = ({ navigation }) => {
     return new Promise((resolve, reject) => {
       console.log(j)
       var y = '';
-      var y = '';
       myArray[j].etbarr[dx - 1] = myArray[j].etb
       //console.log(log.myArray[j].etbarr)
       for (var i = 0; i < 31; i++) {
