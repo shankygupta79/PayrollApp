@@ -1,0 +1,14 @@
+Salary Calculating Payroll App for Shops with Employee Management & Attendance !
+
+This is a cross platform and custom - built mobile application designed for shops and small offices to manage their employees.
+1. Add Employee and save their Detials with Image
+2. Mark Daily Attendance
+3. Get Montly Attendance Report
+4. Add Holidays
+5. Make Departments
+6. Add Extra Time Bonuses for your employees
+7. Make Custom Users which can do restricted activity to the admin's account
+8. Dark Theme
+And Many More....coming....
+
+And use https://payrollv2.herokuapp.com/ for WEB Version

@@ -393,6 +393,9 @@ const AddEmpScreen = ({ navigation }) => {
                         colorAccent={'green'}
                         onOk={result => {
                             setVisible1(false);
+                            if(result.selectedItem==undefined){
+                                return
+                            }
                             setSelect1(result.selectedItem.label);
                         }}
                     />

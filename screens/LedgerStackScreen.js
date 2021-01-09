@@ -364,6 +364,9 @@ const LedgerScreen = ({ navigation }) => {
             colorAccent={'#4d47f5'}
             onOk={result => {
               setVisible1(false);
+              if(result.selectedItem==undefined){
+                return
+              }
               setSelect1(result.selectedItem.label);
             }}
           />

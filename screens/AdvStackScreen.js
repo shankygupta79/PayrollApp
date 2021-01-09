@@ -213,6 +213,9 @@ const AdvScreen = ({ navigation }) => {
             colorAccent={'#4d47f5'}
             onOk={result => {
               setVisible1(false);
+              if(result.selectedItem==undefined){
+                return
+            }
               setSelect1(result.selectedItem.label);
             }}
           />
@@ -237,7 +240,11 @@ const AdvScreen = ({ navigation }) => {
             colorAccent={'#4d47f5'}
             onCancel={() => setVisible3(false)}
             onOk={result => {
+              
               setVisible3(false);
+              if(result.selectedItem==undefined){
+                return
+            }
               setSelect3(result.selectedItem.label);
             }}
           />

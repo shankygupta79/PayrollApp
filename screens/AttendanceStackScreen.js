@@ -65,6 +65,7 @@ const AttendanceScreen = ({ navigation }) => {
       .then((responseJson) => {
         console.log("ATT API")
         //console.log(responseJson)
+        console.log(responseJson)
         if (responseJson == false) {
           Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
             { text: 'Okay' }
@@ -74,7 +75,7 @@ const AttendanceScreen = ({ navigation }) => {
         }
 
         if (responseJson == '5') {
-          Alert.alert('Chart for this Month Created!', 'Reload to mark Attendance !', [
+          Alert.alert('Chart for this Month Created!', 'Reload by Clicking on the Date Above to Mark Attendance or Add Atleast One Employee to Mark Attendance!', [
             { text: 'Okay' }
           ]);
           setLoader(true)
@@ -87,9 +88,9 @@ const AttendanceScreen = ({ navigation }) => {
           for (var i = 0; i < responseJson.length; i++) {
             var temp = '';
             var tpr = '';
-            var temparray = Response1[i].extratime.split(';')
+            var temparray = responseJson[i].extratime.split(';')
             //console.log(temparray)
-            temp = temparray[(log.dx - 1)]
+            temp = temparray[(dx - 1)]
             var st = responseJson[i].present[dx - 1]
             if (st == '-') {
               tpr = "none"

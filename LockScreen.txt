@@ -1,0 +1,16 @@
+Maine socha
+I will make two async storage variables
+1. SAVED_PASSCODE
+2. USER_ENTERED_PASSCODE
+
+before rendering anyscreen , I will check 
+
+if SAVED_PASSCODE==USER_ENTERED_PASSCODE
+	render lock screen
+else 
+	render the page
+
+And If APP gets closed or gets in foreground !
+USER_ENTER_PASSCODE GETS NULL
+
+https://reactnative.dev/docs/appstate

@@ -67,6 +67,11 @@ const UserScreen = ({ route, navigation }) => {
         try {
             const response = await fetch(api);
             const responseJson = await response.json();
+            if(Array.isArray(responseJson)  && responseJson==false){
+                setRef(false)
+                setLoader(true)
+                return
+            }
             if(responseJson==false){
                 Alert.alert('No Access!', 'Ask Admin to provide you the access of this page !.', [
                   { text: 'Okay' }
